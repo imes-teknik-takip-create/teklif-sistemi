@@ -8,55 +8,64 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
-        :root { --primary: #2563eb; --bg: #f8fafc; }
-        body { background: var(--bg); font-family: 'Inter', sans-serif; margin: 0; padding-bottom: 70px; }
-        
-        .main-row { display: flex; height: calc(100vh - 60px); }
-        .panel { height: 100%; overflow-y: auto; padding: 15px; border-right: 1px solid #e2e8f0; }
-        
+    :root { --primary: #2563eb; --bg: #f8fafc; --dark: #1e293b; }
+    
+    /* GENEL AYARLAR */
+    body { background: var(--bg); font-family: 'Inter', sans-serif; margin: 0; padding-bottom: 70px; -webkit-tap-highlight-color: transparent; }
+    
+    /* MASAÜSTÜ (PC) DÜZENİ - Yan Yana 3 Panel */
+    @media (min-width: 993px) {
+        .main-row { display: flex !important; height: calc(100vh - 60px); }
+        .panel { display: block !important; height: 100%; overflow-y: auto; padding: 15px; border-right: 1px solid #e2e8f0; }
         .left-panel { width: 35%; background: white; }
         .mid-panel { width: 35%; background: #f1f5f9; } 
         .archive-panel { width: 30%; background: #e2e8f0; }
+    }
 
-        .mobile-nav { display: none; position: fixed; bottom: 0; left: 0; right: 0; background: #1e293b; justify-content: space-around; padding: 10px; z-index: 1000; border-top: 2px solid var(--primary); }
-        .mobile-nav button { background: none; border: none; color: #94a3b8; font-size: 11px; display: flex; flex-direction: column; align-items: center; }
-        .mobile-nav button.active { color: white; }
-        .mobile-nav i { font-size: 20px; }
-
-        @media (max-width: 992px) {
-            .main-row { display: block; height: auto; }
-            .panel { width: 100%; display: none; height: calc(100vh - 120px); border: none; }
-            .panel.active { display: block; }
-            .mobile-nav { display: flex; }
-            body { padding-bottom: 80px; }
+    /* TELEFON (MOBİL) DÜZENİ - Tekli Panel ve Navigasyon */
+    @media (max-width: 992px) {
+        .main-row { display: block !important; height: auto !important; }
+        .panel { 
+            display: none !important; /* Önce hepsini kapat */
+            width: 100% !important; 
+            min-height: calc(100vh - 120px); 
+            padding: 15px; 
+            border: none;
         }
+        .panel.active { display: block !important; } /* Sadece tıklananı göster */
+        .mobile-nav { display: flex !important; position: fixed; bottom: 0; left: 0; right: 0; background: var(--dark); justify-content: space-around; padding: 10px; z-index: 1000; border-top: 2px solid var(--primary); }
+        body { padding-bottom: 85px; }
+        .h4 { font-size: 1.2rem; }
+    }
 
-        .product-card { border: 1px solid #e2e8f0; border-radius: 10px; margin-bottom: 10px; padding: 10px; background: #fff; }
-        .price-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 3px; margin-top: 8px; }
-        .p-box { text-align: center; padding: 5px 1px; border-radius: 5px; font-size: 11px; font-weight: normal; cursor: pointer; border: 1px solid #ddd; line-height: 1.2; }
-        .p-box small { display: block; font-size: 8px; opacity: 0.8; font-weight: normal; }
-        
-        .p-liste { background: #f8fafc; color: #000; } 
-        .p-25 { background: #eff6ff; color: #000; } 
-        .p-30 { background: #fff7ed; color: #000; } 
-        .p-35 { background: #fdf2f8; color: #000; }
+    /* ÜRÜN KARTLARI */
+    .product-card { border: 1px solid #e2e8f0; border-radius: 10px; margin-bottom: 10px; padding: 12px; background: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+    .price-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; margin-top: 10px; }
+    .p-box { text-align: center; padding: 8px 2px; border-radius: 6px; font-size: 11px; cursor: pointer; border: 1px solid #ddd; line-height: 1.3; transition: 0.2s; }
+    .p-box:active { transform: scale(0.95); background: #eee; }
+    .p-box small { display: block; font-size: 9px; opacity: 0.8; }
+    
+    .p-liste { background: #f8fafc; color: #000; } 
+    .p-25 { background: #eff6ff; color: #000; border-color: #bfdbfe; } 
+    .p-30 { background: #fff7ed; color: #000; border-color: #ffedd5; } 
+    .p-35 { background: #fdf2f8; color: #000; border-color: #fbcfe8; }
 
-        .cart-item { background: white; border: 1px solid var(--primary); border-radius: 8px; padding: 10px; margin-bottom: 8px; font-size: 13px; cursor: grab; }
-.cart-item.dragging { 
-    opacity: 1; /* %100 görünürlük sağlar */
-    border: 2px solid #2563eb; /* Nereyi taşıdığını anlaman için mavi kenarlık */
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15); /* Hafif gölge ile ürünü kağıttan ayırır */
-    background-color: #332f2f; /* Arka planın bembeyaz kalmasını sağlar */
-}
-        .input-mini { border: 1px solid #cbd5e1; border-radius: 4px; width: 50px; text-align: center; font-size: 12px; }
-        .total-area { background: #1e293b; color: white; border-radius: 10px; padding: 12px; }
-        
-        #pdf-export-container { display: none; background: white; padding: 30px; }
+    /* SEPET ÖĞELERİ */
+    .cart-item { background: white; border: 1px solid #cbd5e1; border-radius: 12px; padding: 15px; margin-bottom: 10px; font-size: 14px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); touch-action: none; user-select: none; }
+    .cart-item.dragging { opacity: 1; border: 2px solid var(--primary); box-shadow: 0 8px 20px rgba(0,0,0,0.15); background-color: #ffffff; }
 
-        /* Yeni Modal Stil Ayarları */
-        .modal-content { border-radius: 15px; overflow: hidden; }
-        .preview-table th { background-color: #f8f9fa; color: #333; font-weight: 600; text-transform: uppercase; font-size: 11px; }
-    </style>
+    /* MOBİL NAVİGASYON BUTONLARI */
+    .mobile-nav button { background: none; border: none; color: #94a3b8; font-size: 11px; display: flex; flex-direction: column; align-items: center; }
+    .mobile-nav button.active { color: white; }
+    .mobile-nav i { font-size: 22px; margin-bottom: 2px; }
+
+    /* DİĞER AYARLAR */
+    .input-mini { border: 1px solid #cbd5e1; border-radius: 4px; width: 45px; height: 30px; text-align: center; }
+    .total-area { background: var(--dark); color: white; border-radius: 12px; padding: 15px; }
+    #pdf-export-container { display: none; background: white; padding: 30px; }
+    .modal-content { border-radius: 15px; overflow: hidden; }
+    .preview-table th { background-color: #f8f9fa; color: #333; font-weight: 600; text-transform: uppercase; font-size: 11px; }
+</style>
 </head>
 <body>
 
