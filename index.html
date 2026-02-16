@@ -1,35 +1,668 @@
+<!DOCTYPE html>
+<html lang="tr">
 <head>
-    ... diğer kodlar ...
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>IMESSPOR PRO v21.0</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
-        /* Mevcut CSS kodların burada duruyor... */
-        /* Hiçbirini silme, en alta in ve şu yeni kodları ekle: */
+        :root { --primary: #2563eb; --bg: #f8fafc; }
+        body { background: var(--bg); font-family: 'Inter', sans-serif; margin: 0; padding-bottom: 70px; }
+        
+        .main-row { display: flex; height: calc(100vh - 60px); }
+        .panel { height: 100%; overflow-y: auto; padding: 15px; border-right: 1px solid #e2e8f0; }
+        
+        .left-panel { width: 35%; background: white; }
+        .mid-panel { width: 35%; background: #f1f5f9; } 
+        .archive-panel { width: 30%; background: #e2e8f0; }
 
-        @media (max-width: 768px) {
-            body {
-                padding: 10px;
-            }
-            /* Bölümleri telefonda alt alta diziyoruz */
-            .main-container { 
-                display: flex;
-                flex-direction: column;
-            }
-            /* Butonlar parmakla basılabilecek kadar büyüsün */
-            button, .btn {
-                width: 100% !important;
-                margin: 5px 0 !important;
-                height: 50px;
-                font-size: 16px !important;
-            }
-            /* Tablo mobilde sağa sola kaysın, ekranı patlatmasın */
-            .table-responsive {
-                overflow-x: auto;
-                display: block;
-            }
-            /* Input alanları (Müşteri adı vb.) tam genişlik */
-            input[type="text"], input[type="number"] {
-                width: 100% !important;
-                font-size: 16px !important; /* iPhone'da otomatik zoom yapmasın diye */
-            }
+        .mobile-nav { display: none; position: fixed; bottom: 0; left: 0; right: 0; background: #1e293b; justify-content: space-around; padding: 10px; z-index: 1000; border-top: 2px solid var(--primary); }
+        .mobile-nav button { background: none; border: none; color: #94a3b8; font-size: 11px; display: flex; flex-direction: column; align-items: center; }
+        .mobile-nav button.active { color: white; }
+        .mobile-nav i { font-size: 20px; }
+
+        @media (max-width: 992px) {
+            .main-row { display: block; height: auto; }
+            .panel { width: 100%; display: none; height: calc(100vh - 120px); border: none; }
+            .panel.active { display: block; }
+            .mobile-nav { display: flex; }
+            body { padding-bottom: 80px; }
         }
+
+        .product-card { border: 1px solid #e2e8f0; border-radius: 10px; margin-bottom: 10px; padding: 10px; background: #fff; }
+        .price-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 3px; margin-top: 8px; }
+        .p-box { text-align: center; padding: 5px 1px; border-radius: 5px; font-size: 11px; font-weight: normal; cursor: pointer; border: 1px solid #ddd; line-height: 1.2; }
+        .p-box small { display: block; font-size: 8px; opacity: 0.8; font-weight: normal; }
+        
+        .p-liste { background: #f8fafc; color: #000; } 
+        .p-25 { background: #eff6ff; color: #000; } 
+        .p-30 { background: #fff7ed; color: #000; } 
+        .p-35 { background: #fdf2f8; color: #000; }
+
+        .cart-item { background: white; border: 1px solid var(--primary); border-radius: 8px; padding: 10px; margin-bottom: 8px; font-size: 13px; cursor: grab; }
+.cart-item.dragging { 
+    opacity: 1; /* %100 görünürlük sağlar */
+    border: 2px solid #2563eb; /* Nereyi taşıdığını anlaman için mavi kenarlık */
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15); /* Hafif gölge ile ürünü kağıttan ayırır */
+    background-color: #332f2f; /* Arka planın bembeyaz kalmasını sağlar */
+}
+        .input-mini { border: 1px solid #cbd5e1; border-radius: 4px; width: 50px; text-align: center; font-size: 12px; }
+        .total-area { background: #1e293b; color: white; border-radius: 10px; padding: 12px; }
+        
+        #pdf-export-container { display: none; background: white; padding: 30px; }
+
+        /* Yeni Modal Stil Ayarları */
+        .modal-content { border-radius: 15px; overflow: hidden; }
+        .preview-table th { background-color: #f8f9fa; color: #333; font-weight: 600; text-transform: uppercase; font-size: 11px; }
     </style>
 </head>
+<body>
+
+<nav class="navbar navbar-dark bg-dark px-3 py-2 sticky-top">
+    <span class="navbar-brand fw-bold" style="font-size: 14px;">IMESSPOR PRO</span>
+    <div class="d-flex gap-2">
+        <button class="btn btn-outline-success btn-sm" onclick="document.getElementById('excelInput').click()"><i class="bi bi-upload"></i></button>
+        <input type="file" id="excelInput" style="display:none" accept=".csv" onchange="importCSV(this)">
+        <div id="kurGosterge" class="badge bg-success d-flex align-items-center" style="font-size: 10px;">USD: --,-- ₺</div>
+        <button class="btn btn-outline-danger btn-sm" onclick="clearCatalog()"><i class="bi bi-trash"></i></button>
+    </div>
+</nav>
+
+<div class="main-row">
+    <div id="tab-products" class="panel left-panel active">
+        <input type="text" id="search" class="form-control mb-3" placeholder="Ürün veya Kod Ara..." oninput="renderProducts()">
+        <div id="productList"></div>
+    </div>
+
+    <div id="tab-cart" class="panel mid-panel">
+        <input type="text" id="customerName" class="form-control mb-3 fw-bold" placeholder="Müşteri Adı">
+        <div id="cartItems" ondragover="initSortable(event)"></div>
+        <div id="summaryArea" style="display:none">
+            <div class="total-area mb-3 text-center">
+                <div class="small opacity-75">TOPLAM (KDV DAHİL)</div>
+                <div id="sumGenel" class="h4 m-0 fw-bold">0,00 ₺</div>
+            </div>
+            <div class="d-flex justify-content-end mt-3">
+                <div class="d-flex gap-2" style="width: 100%; max-width: 400px;">
+    <button class="btn btn-success btn-sm fw-bold flex-fill" onclick="newQuote()">YENİ</button>
+    <button class="btn btn-warning btn-sm fw-bold flex-fill" onclick="saveToArchive()">KAYDET</button>
+    <button class="btn btn-info btn-sm fw-bold flex-fill text-white" onclick="previewCurrentQuote()">
+        <i class="bi bi-eye"></i>
+    </button>
+    <button class="btn btn-primary btn-sm fw-bold flex-fill" onclick="generatePDF()">İNDİR</button>
+</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="tab-archive" class="panel archive-panel">
+        <h6 class="fw-bold mb-3">GEÇMİŞ TEKLİFLER</h6>
+        <div id="archiveList"></div>
+    </div>
+</div>
+
+<div class="modal fade" id="previewModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-white border-bottom">
+                <h5 class="modal-title fw-bold text-dark"><i class="bi bi-file-earmark-text me-2 text-primary"></i>TEKLİF ÖNİZLEME</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4" id="previewBody" style="background: white; color: #333;">
+                </div>
+            <div class="modal-footer border-0 bg-light">
+                <button type="button" class="btn btn-dark fw-bold px-4" data-bs-dismiss="modal">KAPAT</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="mobile-nav">
+    <button id="btn-prod" onclick="switchTab('products')" class="active"><i class="bi bi-grid"></i>Ürünler</button>
+    <button id="btn-cart" onclick="switchTab('cart')"><i class="bi bi-calculator"></i>Teklif</button>
+    <button id="btn-arch" onclick="switchTab('archive')"><i class="bi bi-archive"></i>Arşiv</button>
+</div>
+
+<div id="pdf-export-container">
+    <div style="display: flex; justify-content: space-between; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 20px;">
+        <h1 style="margin: 0; font-size: 24px; font-weight: bold;">imesspor</h1>
+        <div style="text-align: right;"><h2 style="margin: 0; font-size: 18px;">TEKLİF FORMU</h2></div>
+    </div>
+    <div style="margin-bottom: 15px;"><strong id="pdf_cust_title" style="text-transform: uppercase;">MÜŞTERİ</strong></div>
+    <table style="width: 100%; border-collapse: collapse; font-size: 11px;">
+        <thead>
+            <tr style="background: #eee;">
+                <th style="border: 1px solid #ddd; padding: 6px;">Kod</th>
+                <th style="border: 1px solid #ddd; padding: 6px;">Ürün</th>
+                <th style="border: 1px solid #ddd; padding: 6px; text-align: right;">Birim (TL)</th>
+                <th style="border: 1px solid #ddd; padding: 6px; text-align: center;">Adet</th>
+                <th style="border: 1px solid #ddd; padding: 6px; text-align: right;">Toplam</th>
+            </tr>
+        </thead>
+        <tbody id="pdf_items_body"></tbody>
+    </table>
+    <div style="text-align:right; margin-top:15px; font-size: 13px; font-weight: bold;">
+        Genel Toplam (KDV Dahil): <span id="pdf_grand_total">0,00 TL</span>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    const trLower = (str) => str.replace(/İ/g, "i").replace(/I/g, "ı").toLowerCase();
+    let products = JSON.parse(localStorage.getItem('imes_katalog')) || [];
+    let archive = JSON.parse(localStorage.getItem('imes_arsiv')) || [];
+    let cart = [];
+    let usdRate = 43.71;
+
+    function f(val) { return new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(val); }
+
+    function switchTab(tabId) {
+        document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.mobile-nav button').forEach(b => b.classList.remove('active'));
+        document.getElementById('tab-' + tabId).classList.add('active');
+        if(tabId === 'products') document.getElementById('btn-prod').classList.add('active');
+        if(tabId === 'cart') document.getElementById('btn-cart').classList.add('active');
+        if(tabId === 'archive') document.getElementById('btn-arch').classList.add('active');
+    }
+
+    async function getKur() {
+        try { const res = await fetch('https://api.exchangerate-api.com/v4/latest/USD'); const data = await res.json(); usdRate = data.rates.TRY; } catch(e){}
+        document.getElementById('kurGosterge').innerText = `USD: ${f(usdRate)} ₺`;
+        renderProducts(); renderArchive();
+    }
+
+    function renderProducts() {
+    const q = trLower(document.getElementById('search').value);
+    document.getElementById('productList').innerHTML = products.filter(p => 
+        trLower(p.kod||"").includes(q) || trLower(p.ad||"").includes(q)
+    ).map(p => {
+        const tlBase = p.fiyat * usdRate;
+        const getPrices = (ratio) => {
+            const currentUsd = p.fiyat * ratio;
+            const currentTl = tlBase * ratio;
+            return `<b>${f(currentTl)} ₺</b><br><small style="font-size: 10px; opacity: 0.9;">$${f(currentUsd)}</small>`;
+        };
+
+        return `
+        <div class="product-card">
+            <div class="fw-bold small mb-2"><span class="badge bg-dark me-1">${p.kod}</span> ${p.ad}</div>
+            <div class="price-grid">
+                <div class="p-box p-liste" onclick="addToCart('${p.kod}', 0)">
+                    LİSTE<br>${getPrices(1)}
+                </div>
+                <div class="p-box p-25" onclick="addToCart('${p.kod}', 25)">
+                    %25<br>${getPrices(0.75)}
+                </div>
+                <div class="p-box p-30" onclick="addToCart('${p.kod}', 30)">
+                    %30<br>${getPrices(0.7)}
+                </div>
+                <div class="p-box p-35" onclick="addToCart('${p.kod}', 35)">
+                    %35<br>${getPrices(0.65)}
+                </div>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+    function addToCart(kod, disc) {
+        // 1. ADIM: Ürün zaten sepette var mı kontrol et
+        const isExist = cart.find(x => x.kod === kod);
+        
+        if (isExist) {
+            alert("⚠️ Bu ürün zaten sepette ekli! Adeti teklif sayfasından güncelleyebilirsiniz.");
+            return; // Eğer varsa fonksiyonu burada durdur, aşağıya geçip tekrar ekleme.
+        }
+
+        // 2. ADIM: Ürün yoksa normal ekleme işlemine devam et
+        const p = products.find(x => x.kod === kod);
+        if(!p) return;
+        cart.push({ id: Date.now(), kod: p.kod, ad: p.ad, discount: disc, qty: 1, baseUsd: p.fiyat });
+        updateUI();
+        
+        if(window.innerWidth < 992) {
+            if(confirm("Eklendi! Teklif sayfasına gitmek ister misiniz?")) switchTab('cart');
+        }
+    }
+
+    function updateUI() {
+        document.getElementById('cartItems').innerHTML = cart.map(item => {
+            const unitPriceTl = item.baseUsd * (1 - item.discount / 100) * usdRate;
+            const totalItemPrice = unitPriceTl * item.qty;
+
+            return `
+            <div class="cart-item" draggable="true" ondragstart="this.classList.add('dragging')" ondragend="this.classList.remove('dragging'); finalizeSort();" data-id="${item.id}">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <div style="max-width:85%;">
+                        <span class="badge bg-dark me-1" style="font-size: 10px;">${item.kod}</span>
+                        <b style="font-size: 13px;">${item.ad}</b>
+                    </div>
+                    <i class="bi bi-trash text-danger" style="cursor:pointer;" onclick="removeItem(${item.id})"></i>
+                </div>
+                
+                <div class="d-flex align-items-center justify-content-between bg-light p-2 rounded">
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="d-flex align-items-center">
+                            <span class="small me-1">İnd:</span>
+                            <input type="number" class="input-mini" value="${item.discount}" 
+                                   style="width: 42px; height: 26px; font-size: 12px; border:1px solid #ccc; border-radius:4px;"
+                                   onchange="updateItem(${item.id}, 'discount', this.value)">
+                            <span class="small ms-1">%</span>
+                        </div>
+                        <div class="d-flex align-items-center ms-1">
+                            <span class="small me-1">Adet:</span>
+                            <input type="number" class="input-mini" value="${item.qty}" 
+                                   style="width: 42px; height: 26px; font-size: 12px; border:1px solid #ccc; border-radius:4px;"
+                                   onchange="updateItem(${item.id}, 'qty', this.value)">
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center justify-content-end" style="min-width: 220px;">
+                        <div class="text-secondary text-end" style="font-size: 13px; font-weight: bold; width: 100px;">
+                            ${f(unitPriceTl)} ₺
+                        </div>
+                        <div style="width: 13px;"></div>
+                        <div class="text-primary text-end" style="font-size: 13px; font-weight: bold; width: 100px;">
+                            ${f(totalItemPrice)} ₺
+                        </div>
+                    </div>
+                </div>
+            </div>`; 
+        }).join('');
+
+        const subtotal = cart.reduce((s, i) => s + (i.baseUsd * (1 - i.discount / 100) * usdRate * i.qty), 0);
+        const kdvTotal = subtotal * 0.20;
+        const grandTotal = subtotal * 1.20;
+
+        const summaryArea = document.getElementById('summaryArea');
+        if (summaryArea) {
+            summaryArea.style.display = cart.length ? 'block' : 'none';
+            document.querySelector('.total-area').innerHTML = `
+                <div class="d-flex justify-content-between align-items-center mb-1" style="font-size: 13px;">
+                    <span class="text-white-50">TOPLAM:</span>
+                    <span class="fw-bold">${f(subtotal)} ₺</span>
+                </div>
+                <div class="d-flex justify-content-between align-items-center mb-2" style="font-size: 13px;">
+                    <span class="text-white-50">KDV (%20):</span>
+                    <span class="fw-bold">${f(kdvTotal)} ₺</span>
+                </div>
+                <div style="border-top: 1px solid rgba(255,255,255,0.1); margin-top: 8px; padding-top: 8px;">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span style="font-size: 13px; color: #fff;">GENEL TOPLAM:</span>
+                        <span id="sumGenel" style="font-size: 13px; font-weight: 800; color: #fff;">${f(grandTotal)} ₺</span>
+                    </div>
+                </div>
+            `;
+        }
+    }
+
+    function updateItem(id, field, val) { const i = cart.find(x => x.id == id); if(i) { i[field] = parseFloat(val) || 0; updateUI(); } }
+    function removeItem(id) { cart = cart.filter(x => x.id != id); updateUI(); }
+    function clearCatalog() { if(confirm("Katalog silinsin mi?")) { products = []; localStorage.removeItem('imes_katalog'); renderProducts(); } }
+
+    function saveToArchive() {
+        const customerInput = document.getElementById('customerName');
+        const name = customerInput.value.trim();
+        if (!name) {
+            alert("⚠️ Lütfen önce bir Müşteri Adı giriniz!");
+            customerInput.focus();
+            return;
+        }
+        const subtotal = cart.reduce((s, i) => s + (i.baseUsd * (1 - i.discount / 100) * usdRate * i.qty), 0);
+        const total = subtotal * 1.20;
+        archive.unshift({ 
+            id: Date.now(), 
+            customer: name, 
+            date: new Date().toLocaleString('tr-TR'), 
+            items: JSON.parse(JSON.stringify(cart)), 
+            total: total 
+        });
+        localStorage.setItem('imes_arsiv', JSON.stringify(archive));
+        alert("✅ Teklif '" + name + "' adına başarıyla kaydedildi."); 
+        renderArchive();
+    }
+
+    function renderArchive() {
+        document.getElementById('archiveList').innerHTML = archive.map(t => `
+            <div class="p-2 bg-white rounded shadow-sm mb-2 small border-start border-primary border-4">
+                <div class="d-flex justify-content-between"><b>${t.customer}</b> <span>${t.date.split(' ')[0]}</span></div>
+                <div class="text-primary fw-bold my-1">${f(t.total)} ₺</div>
+                <div class="d-flex justify-content-end gap-1 mt-2">
+                    <button class="btn btn-outline-secondary" style="font-size:10px; width: 35px; height: 26px; padding: 0;" onclick="previewArchive(${t.id})" title="Önizle">
+                        <i class="bi bi-eye"></i>
+                    </button>
+                    <button class="btn btn-outline-primary fw-bold" style="font-size:10px; width: 55px; height: 26px; padding: 0;" onclick="loadArchive(${t.id})">AÇ</button>
+                    <button class="btn btn-outline-danger fw-bold" style="font-size:10px; width: 55px; height: 26px; padding: 0;" onclick="deleteArchive(${t.id})">SİL</button>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function newQuote() {
+        if (cart.length > 0 || document.getElementById('customerName').value !== "") {
+            if (confirm("Mevcut veriler silinecek. Yeni teklif sayfası açılsın mı?")) {
+                cart = []; 
+                document.getElementById('customerName').value = ""; 
+                updateUI();
+                if(window.innerWidth < 992) switchTab('products');
+            }
+        } else {
+            alert("Zaten yeni bir teklif sayfasındasınız.");
+        }
+    }
+
+    function loadArchive(id) { 
+        const t = archive.find(x => x.id === id); 
+        if(t) { 
+            cart = JSON.parse(JSON.stringify(t.items)); 
+            document.getElementById('customerName').value = t.customer; 
+            updateUI(); 
+            if(window.innerWidth < 992) switchTab('cart');
+        } 
+    }
+
+    function deleteArchive(id) { if(confirm("Silinsin mi?")) { archive = archive.filter(x => x.id !== id); localStorage.setItem('imes_arsiv', JSON.stringify(archive)); renderArchive(); } }
+
+    function importCSV(input) {
+        const reader = new FileReader();
+        reader.onload = e => {
+            const lines = e.target.result.split(/\r?\n/);
+            let productMap = new Map();
+            products.forEach(p => productMap.set(p.kod, p));
+            lines.forEach((line, idx) => {
+                if(idx === 0 || !line.trim()) return;
+                const c = line.split(line.includes(';') ? ';' : ',');
+                if(c.length >= 3) {
+                    const kod = c[0].trim();
+                    const ad = c[1].trim().toUpperCase();
+                    const fiyat = parseFloat(c[2].replace(',', '.')) || 0;
+                    productMap.set(kod, { kod, ad, fiyat });
+                }
+            });
+            products = Array.from(productMap.values());
+            localStorage.setItem('imes_katalog', JSON.stringify(products));
+            renderProducts();
+            alert("Ürün listesi güncellendi. Toplam benzersiz ürün: " + products.length);
+        };
+        reader.readAsText(input.files[0], "utf-8");
+    }
+
+    function generatePDF() {
+        const customerInput = document.getElementById('customerName');
+        const name = customerInput.value.trim();
+        if (!name) {
+            alert("⚠️ PDF oluşturmak için lütfen önce bir Müşteri Adı giriniz!");
+            customerInput.focus();
+            return;
+        }
+
+        const subtotal = cart.reduce((s, i) => s + (i.baseUsd * (1 - i.discount / 100) * usdRate * i.qty), 0);
+        const kdvTotal = subtotal * 0.20;
+        const grandTotal = subtotal * 1.20;
+        const bugun = new Date().toLocaleDateString('tr-TR');
+
+        // PDF İÇERİĞİ
+        document.getElementById('pdf-export-container').innerHTML = `
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px;">
+                <div>
+                    <h1 style="margin: 0; color: #76bc21; font-size: 32px; font-weight: bold; font-style: italic;">imesspor</h1>
+                    <div style="font-size: 10px; color: #666; margin-top: -5px;">Dış Ticaret A.Ş.</div>
+                </div>
+                <div style="text-align: right; font-size: 12px; color: #333; margin-top: 10px;">
+                    info@imesspor.com  |  www.imesspor.com
+                </div>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: baseline; border-bottom: 2px solid #333; padding-bottom: 5px; margin-bottom: 15px;">
+                <h2 style="margin: 0; font-size: 24px; font-weight: bold; letter-spacing: 1px;">TEKLİF FORMU</h2>
+                <div style="font-size: 13px;"><b>Tarih:</b> <span style="margin-left: 20px;">${bugun}</span></div>
+            </div>
+            
+            <div style="margin-bottom: 20px; font-size: 13px;">
+                <b>FİRMA / KİŞİ:</b> <span style="margin-left: 10px;">${name.toUpperCase()}</span>
+            </div>
+            
+            <table style="width: 100%; border-collapse: collapse; font-size: 11px;">
+                <thead>
+                    <tr style="background: #f2f2f2;">
+                        <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Kod</th>
+                        <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Ürün</th>
+                        <th style="border: 1px solid #ddd; padding: 8px; text-align: center;">Birim (TL)</th>
+                        <th style="border: 1px solid #ddd; padding: 8px; text-align: center;">Adet</th>
+                        <th style="border: 1px solid #ddd; padding: 8px; text-align: center;">Toplam</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${cart.map(i => {
+                        const birim = i.baseUsd * (1 - i.discount / 100) * usdRate;
+                        const toplam = birim * i.qty;
+                        return `
+                        <tr>
+                            <td style="padding:8px; border:1px solid #ddd;">${i.kod}</td>
+                            <td style="padding:8px; border:1px solid #ddd;">${i.ad}</td>
+                            <td style="padding:8px; border:1px solid #ddd; text-align:center;">${f(birim)} TL</td>
+                            <td style="padding:8px; border:1px solid #ddd; text-align:center;">${i.qty}</td>
+                            <td style="padding:8px; border:1px solid #ddd; text-align:center;">${f(toplam)} TL</td>
+                        </tr>`;
+                    }).join('')}
+                </tbody>
+            </table>
+
+            <div style="margin-top:15px; font-size: 12px; text-align: right; line-height: 1.6;">
+                <div>Ara Toplam : <span style="display:inline-block; width: 120px;"><b>${f(subtotal)} TL</b></span></div>
+                <div>KDV (%20) : <span style="display:inline-block; width: 120px;"><b>${f(kdvTotal)} TL</b></span></div>
+                <div style="font-size: 14px; border-top: 1px solid #000; padding-top: 5px; margin-top: 5px;">
+                    Genel Toplam : <span style="display:inline-block; width: 120px;"><b>${f(grandTotal)} TL</b></span>
+                </div>
+            </div>
+
+            <div style="margin-top: 30px; font-size: 10px; line-height: 1.5; color: #000;">
+                <h3 style="font-weight: bold; font-size: 12px; margin-bottom: 10px; border-bottom: 1px solid #000; display: inline-block;">TEKLİF ŞARTLARI</h3>
+                <div>* Ürünlerin nakliye bedeli alıcı firma/kişi tarafından karşılanacaktır.</div>
+                <div>* Ürünlerin kurulum yapılacak alana indirilmesi için kiralanacak vinç, forklift ve hamaliye gibi ücretler alıcı tarafından karşılanacaktır.</div>
+                <div>* Fiyatlarımıza montaj ve garanti kapsamındaki Teknik Servis dahildir.</div>
+                <div>* Kurulum ve montaj anlaşılan ödemeler tamamlandıktan sonra 5 (beş) iş günü içinde yapılacaktır.</div>
+                <div>* Kurulumu yapılacak alan eksiksiz olarak İmes Spor'a teslim edilecektir. (Tüm İnşaat İşleri, elektrik tesisatı ve topraklama hattı tamamlanmış olarak)</div>
+                <div>* Ürünlerimiz 2 yıl garantilidir.</div>
+                <div>* Teklifimizin geçerlilik tarihi 3 (üç) gündür.</div>
+                <div>* Döviz fiyatı verilen teklifler gün kuru üzerinden verilmiş olup, anlaşma yapıldığı gün merkez bankası kur fiyatı dikkate alınacaktır.</div>
+                <div>* Teklifimizi olumlu karşılamanızı ümit eder, iyi çalışmalar dileriz.</div>
+                <div>* Bu teklif ve ekinde sunulan tüm bilgiler gizlilik şartı gereğince verildiği kurum için özel olarak hazırlanmış olup, sadece teklif verilen firmanın/kişinin kullanımına özeldir.</div>
+            </div>
+
+            <div style="margin-top: 50px; display: flex; justify-content: space-between; font-weight: bold; font-size: 12px;">
+                <div style="border-top: 1px solid #000; width: 220px; text-align: center; padding-top: 5px;">Satıcı Onayı</div>
+                <div style="border-top: 1px solid #000; width: 220px; text-align: center; padding-top: 5px;">Müşteri Onayı</div>
+            </div>
+        `;
+
+        const el = document.getElementById('pdf-export-container');
+        el.style.display = 'block';
+        html2pdf().from(el).set({
+            margin: 10, filename: name + '_Teklif.pdf',
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2 },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        }).save().then(() => { el.style.display = 'none'; });
+    }
+
+    // YENİ ESTETİK ÖNİZLEME FONKSİYONU
+    function previewArchive(id) {
+        const t = archive.find(x => x.id === id);
+        if (!t) return;
+
+        const grandTotal = t.total;
+        const subtotal = grandTotal / 1.20;
+        const kdvTotal = grandTotal - subtotal;
+
+        let html = `
+            <div class="mb-4">
+                <div class="d-flex justify-content-between align-items-center bg-light p-3 rounded border">
+                    <div>
+                        <small class="text-muted d-block text-uppercase fw-bold" style="font-size:10px;">Müşteri</small>
+                        <strong class="text-dark" style="font-size:1.1rem;">${t.customer.toUpperCase()}</strong>
+                    </div>
+                    <div class="text-end">
+                        <small class="text-muted d-block text-uppercase fw-bold" style="font-size:10px;">Teklif Tarihi</small>
+                        <strong class="text-dark">${t.date}</strong>
+                    </div>
+                </div>
+            </div>
+            <div class="table-responsive">
+                <table class="table align-middle preview-table" style="font-size: 13px;">
+                    <thead>
+                        <tr>
+                            <th style="width: 45%">Ürün Bilgisi</th>
+                            <th class="text-end">Birim Fiyat</th>
+                            <th class="text-center">Adet</th>
+                            <th class="text-end">Toplam</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+        `;
+
+        t.items.forEach(i => {
+            const birimFiyat = i.baseUsd * (1 - i.discount / 100) * usdRate;
+            const satirToplami = birimFiyat * i.qty;
+            html += `
+                <tr>
+                    <td>
+                        <span class="badge bg-dark mb-1" style="font-size:10px;">${i.kod}</span><br>
+                        <span class="fw-bold text-dark">${i.ad}</span>
+                    </td>
+                    <td class="text-end text-muted">${f(birimFiyat)} TL</td>
+                    <td class="text-center fw-bold text-dark">${i.qty}</td>
+                    <td class="text-end fw-bold text-primary">${f(satirToplami)} TL</td>
+                </tr>
+            `;
+        });
+
+        html += `
+                    </tbody>
+                </table>
+            </div>
+            <div class="mt-4 pt-3 border-top text-end" style="line-height: 2;">
+                <div class="text-muted small">Ara Toplam: <span class="text-dark fw-bold ms-2">${f(subtotal)} TL</span></div>
+                <div class="text-muted small">KDV (%20): <span class="text-dark fw-bold ms-2">${f(kdvTotal)} TL</span></div>
+                <div class="h4 mt-2 fw-bold text-primary border-top pt-2">
+                    <span class="text-dark h6 fw-bold me-2">GENEL TOPLAM:</span> ${f(grandTotal)} TL
+                </div>
+            </div>
+        `;
+
+        document.getElementById('previewBody').innerHTML = html;
+        var myModal = new bootstrap.Modal(document.getElementById('previewModal'));
+        myModal.show();
+    }
+    
+    getKur();
+    // Güncel sepeti önizleme fonksiyonu
+function previewCurrentQuote() {
+    if (cart.length === 0) {
+        alert("⚠️ Önizleme yapabilmek için önce ürün eklemelisiniz!");
+        return;
+    }
+
+    const subtotal = cart.reduce((s, i) => s + (i.baseUsd * (1 - i.discount / 100) * usdRate * i.qty), 0);
+    const grandTotal = subtotal * 1.20;
+    const kdvTotal = grandTotal - subtotal;
+    const customerName = document.getElementById('customerName').value || "MÜŞTERİ BELİRTİLMEDİ";
+
+    // Arşiv önizlemesiyle aynı yapıyı kullanıyoruz ki eşleşsinler
+    const tempQuote = {
+        customer: customerName,
+        date: new Date().toLocaleString('tr-TR'),
+        items: cart,
+        total: grandTotal
+    };
+
+    // Mevcut previewArchive mantığını bir objeyle tetikliyoruz
+    renderPreview(tempQuote);
+}
+
+// Ortak görselleştirme motoru (Hem arşiv hem güncel sepet için)
+function renderPreview(data) {
+    const subtotal = data.total / 1.20;
+    const kdvTotal = data.total - subtotal;
+
+    let html = `
+        <div class="mb-4">
+            <div class="d-flex justify-content-between align-items-center bg-light p-3 rounded border">
+                <div>
+                    <small class="text-muted d-block text-uppercase fw-bold" style="font-size:10px;">Müşteri</small>
+                    <strong class="text-dark" style="font-size:1.1rem;">${data.customer.toUpperCase()}</strong>
+                </div>
+                <div class="text-end">
+                    <small class="text-muted d-block text-uppercase fw-bold" style="font-size:10px;">Teklif Tarihi</small>
+                    <strong class="text-dark">${data.date}</strong>
+                </div>
+            </div>
+        </div>
+        <div class="table-responsive">
+            <table class="table align-middle preview-table" style="font-size: 13px;">
+                <thead>
+                    <tr>
+                        <th style="width: 45%">Ürün Bilgisi</th>
+                        <th class="text-center">Birim Fiyat</th>
+                        <th class="text-center">Adet</th>
+                        <th class="text-end">Toplam</th>
+                    </tr>
+                </thead>
+                <tbody>
+    `;
+
+    data.items.forEach(i => {
+        const birimFiyat = i.baseUsd * (1 - i.discount / 100) * usdRate;
+        const satirToplami = birimFiyat * i.qty;
+        html += `
+            <tr>
+                <td>
+                    <span class="badge bg-dark mb-1" style="font-size:10px;">${i.kod}</span><br>
+                    <span class="fw-bold text-dark">${i.ad}</span>
+                </td>
+                <td class="text-center text-muted">${f(birimFiyat)} TL</td>
+                <td class="text-center fw-bold text-dark">${i.qty}</td>
+                <td class="text-end fw-bold text-primary">${f(satirToplami)} TL</td>
+            </tr>`;
+    });
+
+    html += `
+                </tbody>
+            </table>
+        </div>
+        <div class="mt-4 pt-3 border-top text-end" style="line-height: 2;">
+            <div class="text-muted small">Ara Toplam: <span class="text-dark fw-bold ms-2">${f(subtotal)} TL</span></div>
+            <div class="text-muted small">KDV (%20): <span class="text-dark fw-bold ms-2">${f(kdvTotal)} TL</span></div>
+            <div class="h4 mt-2 fw-bold text-primary border-top pt-2">
+                <span class="text-dark h6 fw-bold me-2">GENEL TOPLAM:</span> ${f(data.total)} TL
+            </div>
+        </div>
+    `;
+
+    document.getElementById('previewBody').innerHTML = html;
+    var myModal = new bootstrap.Modal(document.getElementById('previewModal'));
+    myModal.show();
+}
+
+// Eski previewArchive fonksiyonunu da bu yeni renderPreview'ı kullanacak şekilde güncelle
+function previewArchive(id) {
+    const t = archive.find(x => x.id === id);
+    if (t) renderPreview(t);
+}
+function initSortable(e) {
+    e.preventDefault(); // Bu satır 'bırakmaya' izin verir
+    const container = document.getElementById('cartItems');
+    const draggingItem = document.querySelector('.dragging');
+    const siblings = [...container.querySelectorAll('.cart-item:not(.dragging)')];
+    
+    // Altındaki veya üstündeki elemanı bulur
+    let nextSibling = siblings.find(sibling => {
+        return e.clientY <= sibling.getBoundingClientRect().top + sibling.getBoundingClientRect().height / 2;
+    });
+    
+    // Kartı yeni yerine takar
+    container.insertBefore(draggingItem, nextSibling);
+}
+</script>
+</body>
+</html>
