@@ -3,74 +3,70 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>IMESSPOR PRO v19.0 - MOBIL UYUMLU</title>
+    <title>IMESSPOR PRO v20.0 - SEKME MODU</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         :root { --primary: #2563eb; --bg: #f8fafc; }
-        body { background: var(--bg); font-family: 'Inter', sans-serif; margin: 0; padding: 0; }
+        body { background: var(--bg); font-family: 'Inter', sans-serif; margin: 0; padding-bottom: 70px; }
         
-        /* Mobil ve Masaüstü Düzeni */
-        .main-row { display: flex; flex-direction: row; height: calc(100vh - 60px); }
+        .main-row { display: flex; height: calc(100vh - 60px); }
         .panel { height: 100%; overflow-y: auto; padding: 15px; border-right: 1px solid #e2e8f0; }
         
         .left-panel { width: 35%; background: white; }
         .mid-panel { width: 35%; background: #f1f5f9; }
         .archive-panel { width: 30%; background: #e2e8f0; }
 
-        /* Telefon Ekranı İçin Düzenlemeler */
+        /* MOBİL SEKME TASARIMI */
+        .mobile-nav { display: none; position: fixed; bottom: 0; left: 0; right: 0; background: #1e293b; display: none; justify-content: space-around; padding: 10px; z-index: 1000; border-top: 2px solid var(--primary); }
+        .mobile-nav button { background: none; border: none; color: #94a3b8; font-size: 12px; font-weight: 600; display: flex; flex-direction: column; align-items: center; }
+        .mobile-nav button.active { color: white; }
+        .mobile-nav i { font-size: 20px; margin-bottom: 2px; }
+
         @media (max-width: 992px) {
-            .main-row { flex-direction: column; height: auto; overflow-y: visible; }
-            .panel { width: 100%; height: auto; border-right: none; border-bottom: 2px solid #cbd5e1; }
-            body { overflow-y: auto; }
+            .main-row { display: block; height: auto; }
+            .panel { width: 100%; display: none; height: calc(100vh - 120px); border: none; }
+            .panel.active { display: block; }
+            .mobile-nav { display: flex; }
         }
 
-        .product-card { border: 1px solid #e2e8f0; border-radius: 12px; margin-bottom: 12px; padding: 12px; background: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .product-card { border: 1px solid #e2e8f0; border-radius: 12px; margin-bottom: 12px; padding: 12px; background: #fff; }
         .price-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; margin-top: 8px; }
-        .p-box { text-align: center; padding: 8px 2px; border-radius: 6px; font-size: 10px; font-weight: 700; cursor: pointer; line-height: 1.1; border: 1px solid #ddd; }
-        .p-box small { display: block; font-size: 9px; opacity: 0.7; margin-top: 2px; }
-        
-        .p-liste { background: #f8fafc; color: #64748b; }
-        .p-20 { background: #ecfdf5; color: #059669; }
-        .p-25 { background: #eff6ff; color: #2563eb; }
-        .p-30 { background: #fff7ed; color: #d97706; }
-        .p-35 { background: #fdf2f8; color: #db2777; }
-
+        .p-box { text-align: center; padding: 8px 2px; border-radius: 6px; font-size: 10px; font-weight: 700; cursor: pointer; border: 1px solid #ddd; }
+        .p-box small { display: block; font-size: 9px; opacity: 0.7; }
+        .p-liste { background: #f8fafc; } .p-20 { background: #ecfdf5; color: #059669; } .p-25 { background: #eff6ff; color: #2563eb; } .p-30 { background: #fff7ed; color: #d97706; } .p-35 { background: #fdf2f8; color: #db2777; }
         .cart-item { background: white; border: 2px solid var(--primary); border-radius: 10px; padding: 12px; margin-bottom: 10px; }
-        .input-mini { border: 1px solid #cbd5e1; border-radius: 6px; padding: 5px; width: 65px; font-weight: 700; text-align: center; }
-        .total-area { background: #1e293b; color: white; border-radius: 12px; padding: 15px; margin-top: 10px; }
-        
+        .input-mini { border: 1px solid #cbd5e1; border-radius: 6px; width: 60px; text-align: center; font-weight: 700; }
+        .total-area { background: #1e293b; color: white; border-radius: 12px; padding: 15px; }
         #pdf-export-container { display: none; background: white; padding: 30px; }
     </style>
 </head>
 <body>
 
 <nav class="navbar navbar-dark bg-dark px-3 py-2 sticky-top">
-    <span class="navbar-brand fw-bold" style="font-size: 16px;">IMESSPOR PRO</span>
-    <div class="d-flex gap-1">
+    <span class="navbar-brand fw-bold" style="font-size: 14px;">IMESSPOR PRO</span>
+    <div class="d-flex gap-2">
         <button class="btn btn-outline-success btn-sm" onclick="document.getElementById('excelInput').click()"><i class="bi bi-upload"></i></button>
         <input type="file" id="excelInput" style="display:none" accept=".csv" onchange="importCSV(this)">
-        <div id="kurGosterge" class="badge bg-success d-flex align-items-center" style="font-size: 11px;">USD: --,-- ₺</div>
+        <div id="kurGosterge" class="badge bg-success d-flex align-items-center" style="font-size: 10px;">USD: --,-- ₺</div>
         <button class="btn btn-outline-danger btn-sm" onclick="clearCatalog()"><i class="bi bi-trash"></i></button>
     </div>
 </nav>
 
 <div class="main-row">
-    <div class="panel left-panel">
-        <div class="sticky-top bg-white pb-2">
-            <input type="text" id="search" class="form-control" placeholder="Ara (Kod veya Ad)..." oninput="renderProducts()">
-        </div>
-        <div id="productList" class="mt-2"></div>
+    <div id="tab-products" class="panel left-panel active">
+        <input type="text" id="search" class="form-control mb-3" placeholder="Ürün Ara..." oninput="renderProducts()">
+        <div id="productList"></div>
     </div>
 
-    <div class="panel mid-panel">
-        <input type="text" id="customerName" class="form-control mb-3 fw-bold" placeholder="Müşteri Adı / Kurum">
+    <div id="tab-cart" class="panel mid-panel">
+        <input type="text" id="customerName" class="form-control mb-3 fw-bold" placeholder="Müşteri Adı">
         <div id="cartItems"></div>
         <div id="summaryArea" style="display:none">
             <div class="total-area mb-3">
                 <div class="d-flex justify-content-between align-items-center">
-                    <span class="small">GENEL TOPLAM (KDV DAHİL):</span>
+                    <span class="small">TOPLAM:</span>
                     <span id="sumGenel" class="h5 m-0 fw-bold">0,00 ₺</span>
                 </div>
             </div>
@@ -81,10 +77,16 @@
         </div>
     </div>
 
-    <div class="panel archive-panel">
+    <div id="tab-archive" class="panel archive-panel">
         <h6 class="fw-bold mb-3">GEÇMİŞ TEKLİFLER</h6>
         <div id="archiveList"></div>
     </div>
+</div>
+
+<div class="mobile-nav">
+    <button onclick="switchTab('products', this)" class="active"><i class="bi bi-grid"></i>Ürünler</button>
+    <button onclick="switchTab('cart', this)"><i class="bi bi-calculator"></i>Teklif</button>
+    <button onclick="switchTab('archive', this)"><i class="bi bi-archive"></i>Arşiv</button>
 </div>
 
 <div id="pdf-export-container">
@@ -106,45 +108,37 @@
         <tbody id="pdf_items_body"></tbody>
     </table>
     <div style="text-align:right; margin-top:15px; font-size: 12px;">
-        <div>Ara Toplam: <span id="pdf_subtotal">0,00 TL</span></div>
-        <div>KDV (%20): <span id="pdf_kdv">0,00 TL</span></div>
         <div style="font-size: 15px; font-weight: bold;">Genel Toplam: <span id="pdf_grand_total">0,00 TL</span></div>
     </div>
 </div>
 
 <script>
-    // Mobil uyumlu arama fonksiyonu
     const trLower = (str) => str.replace(/İ/g, "i").replace(/I/g, "ı").toLowerCase();
-
     let products = JSON.parse(localStorage.getItem('imes_katalog')) || [];
     let archive = JSON.parse(localStorage.getItem('imes_arsiv')) || [];
     let cart = [];
     let usdRate = 43.71;
 
-    function f(val) {
-        return new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(val);
+    function f(val) { return new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(val); }
+
+    function switchTab(tabId, btn) {
+        document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.mobile-nav button').forEach(b => b.classList.remove('active'));
+        document.getElementById('tab-' + tabId).classList.add('active');
+        btn.classList.add('active');
     }
 
     async function getKur() {
-        try { 
-            const res = await fetch('https://api.exchangerate-api.com/v4/latest/USD'); 
-            const data = await res.json(); 
-            usdRate = data.rates.TRY; 
-        } catch(e){ console.log("Kur hatası."); }
+        try { const res = await fetch('https://api.exchangerate-api.com/v4/latest/USD'); const data = await res.json(); usdRate = data.rates.TRY; } catch(e){}
         document.getElementById('kurGosterge').innerText = `USD: ${f(usdRate)} ₺`;
-        renderProducts();
-        renderArchive();
+        renderProducts(); renderArchive();
     }
 
     function renderProducts() {
         const q = trLower(document.getElementById('search').value);
-        const filtered = products.filter(p => 
-            trLower(p.kod || "").includes(q) || trLower(p.ad || "").includes(q)
-        );
-        
-        document.getElementById('productList').innerHTML = filtered.map(p => `
+        document.getElementById('productList').innerHTML = products.filter(p => trLower(p.kod||"").includes(q) || trLower(p.ad||"").includes(q)).map(p => `
             <div class="product-card">
-                <div class="fw-bold small"><span class="badge bg-dark">${p.kod}</span> ${p.ad}</div>
+                <div class="fw-bold small">${p.kod} - ${p.ad}</div>
                 <div class="price-grid">
                     <div class="p-box p-liste" onclick="addToCart('${p.kod}', 0)">LİSTE<br>${f(p.fiyat * usdRate)}</div>
                     <div class="p-box p-20" onclick="addToCart('${p.kod}', 20)">%20<br>${f(p.fiyat * 0.8 * usdRate)}</div>
@@ -161,125 +155,84 @@
         if(!p) return;
         cart.push({ id: Date.now(), kod: p.kod, ad: p.ad, discount: disc, qty: 1, baseUsd: p.fiyat });
         updateUI();
+        if(window.innerWidth < 992) alert("Ürün Teklif listesine eklendi!");
     }
 
     function updateUI() {
         document.getElementById('cartItems').innerHTML = cart.map(item => {
-            const unitPriceTl = item.baseUsd * (1 - item.discount/100) * usdRate;
+            const up = item.baseUsd * (1 - item.discount/100) * usdRate;
             return `
             <div class="cart-item">
-                <div class="d-flex justify-content-between align-items-start mb-2">
-                    <div style="max-width:70%"><small class="text-muted d-block">${item.kod}</small><b>${item.ad}</b></div>
-                    <button class="btn btn-sm text-danger" onclick="removeItem(${item.id})"><i class="bi bi-x-circle-fill"></i></button>
-                </div>
-                <div class="d-flex align-items-center gap-2">
-                    <div class="text-nowrap small">İnd %: <input type="number" class="input-mini" value="${item.discount}" onchange="updateItem(${item.id}, 'discount', this.value)"></div>
-                    <div class="text-nowrap small">Adet: <input type="number" class="input-mini" value="${item.qty}" onchange="updateItem(${item.id}, 'qty', this.value)"></div>
-                    <div class="ms-auto text-end text-primary fw-bold">${f(unitPriceTl * item.qty)} ₺</div>
+                <div class="d-flex justify-content-between mb-2"><b>${item.ad}</b> <button class="btn btn-sm text-danger" onclick="removeItem(${item.id})">Sil</button></div>
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>İnd: <input type="number" class="input-mini" value="${item.discount}" onchange="updateItem(${item.id}, 'discount', this.value)"></div>
+                    <div>Adet: <input type="number" class="input-mini" value="${item.qty}" onchange="updateItem(${item.id}, 'qty', this.value)"></div>
+                    <div class="text-primary fw-bold">${f(up * item.qty)} ₺</div>
                 </div>
             </div>`;
         }).join('');
-        
         const subtotal = cart.reduce((s, i) => s + (i.baseUsd * (1 - i.discount/100) * usdRate * i.qty), 0);
         document.getElementById('summaryArea').style.display = cart.length ? 'block' : 'none';
         document.getElementById('sumGenel').innerText = f(subtotal * 1.20) + " ₺";
     }
 
-    function updateItem(id, field, val) {
-        const i = cart.find(x => x.id == id);
-        if(i) { i[field] = parseFloat(val) || 0; updateUI(); }
-    }
-
+    function updateItem(id, field, val) { const i = cart.find(x => x.id == id); if(i) { i[field] = parseFloat(val) || 0; updateUI(); } }
     function removeItem(id) { cart = cart.filter(x => x.id != id); updateUI(); }
-
-    function clearCatalog() {
-        if(confirm("Katalog temizlensin mi?")) { 
-            products = []; 
-            localStorage.removeItem('imes_katalog'); 
-            renderProducts(); 
-        }
-    }
+    function clearCatalog() { if(confirm("Katalog silinsin mi?")) { products = []; localStorage.removeItem('imes_katalog'); renderProducts(); } }
 
     function saveToArchive() {
         const name = document.getElementById('customerName').value || "Müşteri";
-        const teklif = {
-            id: Date.now(),
-            customer: name,
-            date: new Date().toLocaleString('tr-TR'),
-            items: JSON.parse(JSON.stringify(cart)),
-            total: cart.reduce((s, i) => s + (i.baseUsd * (1 - i.discount/100) * usdRate * i.qty * 1.20), 0)
-        };
-        archive.unshift(teklif);
+        archive.unshift({ id: Date.now(), customer: name, date: new Date().toLocaleString('tr-TR'), items: JSON.parse(JSON.stringify(cart)), total: cart.reduce((s, i) => s + (i.baseUsd * (1-i.discount/100) * usdRate * i.qty * 1.20), 0) });
         localStorage.setItem('imes_arsiv', JSON.stringify(archive));
-        alert("Arşive kaydedildi.");
-        renderArchive();
+        alert("Kaydedildi."); renderArchive();
     }
 
     function renderArchive() {
         document.getElementById('archiveList').innerHTML = archive.map(t => `
-            <div class="p-2 border rounded bg-white mb-2 shadow-sm small">
-                <div class="d-flex justify-content-between"><b>${t.customer}</b> <span class="text-muted">${t.date.split(' ')[0]}</span></div>
+            <div class="p-2 bg-white rounded shadow-sm mb-2 small border-start border-primary border-4">
+                <div class="d-flex justify-content-between"><b>${t.customer}</b> <span>${t.date.split(' ')[0]}</span></div>
                 <div class="text-primary fw-bold my-1">${f(t.total)} ₺</div>
-                <div class="btn-group w-100 mt-1">
-                    <button class="btn btn-sm btn-outline-primary py-1" onclick="loadArchive(${t.id})">Aç</button>
-                    <button class="btn btn-sm btn-outline-danger py-1" onclick="deleteArchive(${t.id})">Sil</button>
-                </div>
+                <button class="btn btn-sm btn-outline-primary w-100 mt-1" onclick="loadArchive(${t.id})">Düzenle / Aç</button>
+                <button class="btn btn-sm btn-outline-danger w-100 mt-1" onclick="deleteArchive(${t.id})">Sil</button>
             </div>
         `).join('');
     }
 
-    function loadArchive(id) {
-        const t = archive.find(x => x.id === id);
-        if(t) { cart = JSON.parse(JSON.stringify(t.items)); document.getElementById('customerName').value = t.customer; updateUI(); }
+    function loadArchive(id) { 
+        const t = archive.find(x => x.id === id); 
+        if(t) { 
+            cart = JSON.parse(JSON.stringify(t.items)); 
+            document.getElementById('customerName').value = t.customer; 
+            updateUI(); 
+            if(window.innerWidth < 992) switchTab('cart', document.querySelectorAll('.mobile-nav button')[1]);
+        } 
     }
 
-    function deleteArchive(id) {
-        if(confirm("Silinsin mi?")) { archive = archive.filter(x => x.id !== id); localStorage.setItem('imes_arsiv', JSON.stringify(archive)); renderArchive(); }
-    }
+    function deleteArchive(id) { if(confirm("Silinsin mi?")) { archive = archive.filter(x => x.id !== id); localStorage.setItem('imes_arsiv', JSON.stringify(archive)); renderArchive(); } }
 
     function importCSV(input) {
         const reader = new FileReader();
         reader.onload = e => {
             const lines = e.target.result.split(/\r?\n/);
-            const newList = [];
+            const nl = [];
             lines.forEach((line, idx) => {
                 if(idx === 0 || !line.trim()) return;
                 const c = line.split(line.includes(';') ? ';' : ',');
-                if(c.length >= 3) {
-                    newList.push({ kod: c[0].trim(), ad: c[1].trim().toUpperCase(), fiyat: parseFloat(c[2].replace(',', '.')) || 0 });
-                }
+                if(c.length >= 3) nl.push({ kod: c[0].trim(), ad: c[1].trim().toUpperCase(), fiyat: parseFloat(c[2].replace(',', '.')) || 0 });
             });
-            products = newList;
-            localStorage.setItem('imes_katalog', JSON.stringify(products));
-            renderProducts();
-            alert(newList.length + " Ürün yüklendi.");
+            products = nl; localStorage.setItem('imes_katalog', JSON.stringify(products)); renderProducts();
         };
-        reader.readAsText(input.files[0], "utf-8"); // Mobilde UTF-8 daha kararlıdır
+        reader.readAsText(input.files[0], "utf-8");
     }
 
     function generatePDF() {
         const name = document.getElementById('customerName').value || "Teklif";
         const subtotal = cart.reduce((s, i) => s + (i.baseUsd * (1 - i.discount/100) * usdRate * i.qty), 0);
-        
         document.getElementById('pdf_cust_title').innerText = name;
-        document.getElementById('pdf_items_body').innerHTML = cart.map(i => `
-            <tr>
-                <td style="padding:6px; border:1px solid #ddd;">${i.kod}</td>
-                <td style="padding:6px; border:1px solid #ddd;">${i.ad}</td>
-                <td style="padding:6px; border:1px solid #ddd; text-align:right;">${f(i.baseUsd * (1-i.discount/100) * usdRate)}</td>
-                <td style="padding:6px; border:1px solid #ddd; text-align:center;">${i.qty}</td>
-                <td style="padding:6px; border:1px solid #ddd; text-align:right;">${f(i.baseUsd * (1-i.discount/100) * usdRate * i.qty)}</td>
-            </tr>
-        `).join('');
-
-        document.getElementById('pdf_subtotal').innerText = f(subtotal) + " TL";
-        document.getElementById('pdf_kdv').innerText = f(subtotal * 0.20) + " TL";
         document.getElementById('pdf_grand_total').innerText = f(subtotal * 1.20) + " TL";
-
-        const el = document.getElementById('pdf-export-container');
-        el.style.display = 'block';
-        const opt = { margin: 10, filename: name + '.pdf', image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } };
-        html2pdf().set(opt).from(el).save().then(() => el.style.display = 'none');
+        document.getElementById('pdf_items_body').innerHTML = cart.map(i => `<tr><td style="padding:6px; border:1px solid #ddd;">${i.kod}</td><td style="padding:6px; border:1px solid #ddd;">${i.ad}</td><td style="padding:6px; border:1px solid #ddd; text-align:right;">${f(i.baseUsd*(1-i.discount/100)*usdRate)}</td><td style="padding:6px; border:1px solid #ddd; text-align:center;">${i.qty}</td><td style="padding:6px; border:1px solid #ddd; text-align:right;">${f(i.baseUsd*(1-i.discount/100)*usdRate*i.qty)}</td></tr>`).join('');
+        const el = document.getElementById('pdf-export-container'); el.style.display = 'block';
+        html2pdf().from(el).save(name + '.pdf').then(() => el.style.display = 'none');
     }
 
     getKur();
