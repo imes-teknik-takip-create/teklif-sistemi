@@ -25,9 +25,9 @@
         .val-row { display: flex; gap: 20px; align-items: center; border-bottom: 1px solid #f1f5f9; padding-bottom: 8px; margin-bottom: 8px; }
         .input-mini { border: 1px solid #cbd5e1; border-radius: 6px; padding: 2px 8px; width: 75px; font-weight: 700; }
         .total-area { background: #1e293b; color: white; border-radius: 12px; padding: 20px; }
+        
+        /* PDF GİZLİ KONTEYNER */
         #pdf-export-container { display: none; background: white; color: black; padding: 40px; }
-        .pdf-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        .pdf-table th, .pdf-table td { border: 1px solid #ddd; padding: 10px; font-size: 12px; }
     </style>
 </head>
 <body>
@@ -35,6 +35,7 @@
 <nav class="navbar navbar-dark bg-dark px-4 py-2">
     <span class="navbar-brand fw-bold">IMESSPOR KATALOG</span>
     <div class="d-flex gap-2">
+        <button class="btn btn-outline-danger btn-sm" onclick="clearCatalog()">KATALOĞU TEMİZLE</button>
         <button class="btn btn-outline-success btn-sm" onclick="document.getElementById('excelInput').click()">YENİ LİSTE YÜKLE (OPSİYONEL)</button>
         <input type="file" id="excelInput" style="display:none" accept=".csv" onchange="importCSV(this)">
         <div id="kurGosterge" class="badge bg-success d-flex align-items-center">USD: --,-- ₺</div>
@@ -58,16 +59,63 @@
     </div>
 </div>
 
-<div id="pdf-export-container">
-    <h2 id="pdf_cust_name">Müşteri</h2>
-    <table class="pdf-table"><tbody id="pdf_items_body"></tbody></table>
-    <div style="text-align:right; margin-top:20px;">
-        <h3 id="pdf_grand">Toplam: 0,00 ₺</h3>
+<div id="pdf-export-container" style="font-family: Arial, sans-serif;">
+    <div style="display: flex; justify-content: space-between; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 20px;">
+        <h1 style="margin: 0; font-size: 28px; font-weight: bold; letter-spacing: 1px;">imesspor</h1>
+        <div style="text-align: right;"><h2 style="margin: 0; font-size: 20px; font-weight: bold;">TEKLİF FORMU</h2></div>
+    </div>
+
+    <div style="display: flex; justify-content: space-between; margin-bottom: 25px; font-size: 13px;">
+        <div style="width: 50%;">
+            <strong id="pdf_cust_title" style="font-size: 16px; text-transform: uppercase;">MÜŞTERİ</strong><br>
+            <span style="font-size: 11px;">info@imesspor.com | www.imesspor.com</span>
+        </div>
+        <div style="width: 40%; text-align: right;">
+            <table style="width: 100%; font-size: 11px;">
+                <tr><td style="text-align: left;"><strong>Telefon</strong></td><td style="text-align: left;">: +90 262 05326524108</td></tr>
+                <tr><td style="text-align: left;"><strong>Talep Tarihi</strong></td><td style="text-align: left;">: <span id="pdf_date"></span></td></tr>
+                <tr><td style="text-align: left;"><strong>Teklif No</strong></td><td style="text-align: left;">: <span id="pdf_no"></span></td></tr>
+            </table>
+        </div>
+    </div>
+
+    <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 11px;">
+        <thead>
+            <tr style="background-color: #f2f2f2; border-top: 1px solid #000; border-bottom: 1px solid #000;">
+                <th style="padding: 8px; text-align: left; border: 1px solid #ddd;">Kod No</th>
+                <th style="padding: 8px; text-align: left; border: 1px solid #ddd; width: 45%;">Ürün Özellikleri</th>
+                <th style="padding: 8px; text-align: right; border: 1px solid #ddd;">Birim Fiyat</th>
+                <th style="padding: 8px; text-align: center; border: 1px solid #ddd;">Adet</th>
+                <th style="padding: 8px; text-align: right; border: 1px solid #ddd;">Toplam</th>
+            </tr>
+        </thead>
+        <tbody id="pdf_items_body"></tbody>
+    </table>
+
+    <div style="display: flex; justify-content: flex-end; margin-top: 20px;">
+        <table style="width: 40%; font-size: 12px; font-weight: bold; border-collapse: collapse;">
+            <tr><td style="padding: 4px; border-bottom: 1px solid #ddd;">Ara Toplam</td><td style="padding: 4px; text-align: right; border-bottom: 1px solid #ddd;">: <span id="pdf_subtotal">0,00 TL</span></td></tr>
+            <tr><td style="padding: 4px; border-bottom: 1px solid #ddd;">KDV (%20)</td><td style="padding: 4px; text-align: right; border-bottom: 1px solid #ddd;">: <span id="pdf_kdv">0,00 TL</span></td></tr>
+            <tr style="font-size: 14px;"><td style="padding: 8px 4px;">Genel Toplam</td><td style="padding: 8px 4px; text-align: right;">: <span id="pdf_grand_total">0,00 TL</span></td></tr>
+        </table>
+    </div>
+
+    <div style="margin-top: 30px; border-top: 1px solid #000; padding-top: 10px; font-size: 9px; line-height: 1.4;">
+        <h4 style="margin: 0 0 5px 0; font-size: 11px; text-decoration: underline;">TEKLİF ŞARTLARI</h4>
+        * Ürünlerin nakliye bedeli alıcı firma/kişi tarafından karşılanacaktır.<br>
+        * Kurulum yapılacak alana indirilmesi için vinç/forklift ücretleri alıcıya aittir.<br>
+        * Fiyatlarımıza montaj ve garanti kapsamındaki Teknik Servis dahildir.<br>
+        * Ödemeler tamamlandıktan sonra 5 iş günü içinde sevkiyat yapılır.<br>
+        * Ürünlerimiz 2 yıl garantilidir. Teklif geçerlilik süresi 3 gündür.
+    </div>
+
+    <div style="display: flex; justify-content: space-around; margin-top: 40px; font-size: 11px; font-weight: bold; text-align: center;">
+        <div style="width: 150px; border-top: 1px solid #000; padding-top: 5px;">Satıcı Onayı</div>
+        <div style="width: 150px; border-top: 1px solid #000; padding-top: 5px;">Müşteri Onayı</div>
     </div>
 </div>
 
 <script>
-    // --- BURAYA ÜRÜNLERİNİ GÖMEBİLİRSİN (ÖRNEK FORMAT) ---
     const SABIT_URUNLER = [
         { kod: "ZP1100", ad: "YATAY BİSİKLET", fiyat: 1290.00 },
         { kod: "Q5SM", ad: "KOŞU BANDI Q 5SM", fiyat: 3350.00 },
@@ -78,7 +126,6 @@
     let cart = [];
     let usdRate = 43.71;
 
-    // KESİN FORMATLAMA: Binlik nokta, kuruş virgül.
     function f(val) {
         return new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(val);
     }
@@ -95,7 +142,7 @@
 
     function renderProducts() {
         const q = document.getElementById('search').value.toLowerCase();
-        document.getElementById('productList').innerHTML = products.filter(p => p.kod.toLowerCase().includes(q) || p.ad.toLowerCase().includes(q)).map(p => `
+        document.getElementById('productList').innerHTML = products.filter(p => (p.kod||"").toLowerCase().includes(q) || (p.ad||"").toLowerCase().includes(q)).map(p => `
             <div class="product-card">
                 <div class="fw-bold"><span class="badge bg-dark me-2">${p.kod}</span> ${p.ad}</div>
                 <div class="price-grid">
@@ -109,8 +156,17 @@
         `).join('');
     }
 
+    function clearCatalog() {
+        if(confirm("Bütün katalog silinecek. Emin misiniz?")) {
+            products = [];
+            localStorage.removeItem('imes_katalog');
+            renderProducts();
+        }
+    }
+
     function addToCart(kod, disc) {
         const p = products.find(x => x.kod === kod);
+        if(!p) return;
         cart.push({ id: Date.now(), kod: p.kod, ad: p.ad, discount: disc, qty: 1, baseUsd: p.fiyat });
         updateUI();
     }
@@ -140,8 +196,10 @@
 
     function updateItem(id, field, val) {
         const i = cart.find(x => x.id == id);
-        i[field] = parseFloat(val) || 0;
-        updateUI();
+        if(i) {
+            i[field] = parseFloat(val) || 0;
+            updateUI();
+        }
     }
 
     function removeItem(id) { cart = cart.filter(x => x.id != id); updateUI(); }
@@ -149,30 +207,56 @@
     function importCSV(input) {
         const reader = new FileReader();
         reader.onload = e => {
-            const lines = e.target.result.split('\n');
-            const newProds = [];
+            const lines = e.target.result.split(/\r?\n/);
+            const currentProducts = [...products];
             lines.forEach((line, idx) => {
                 if(idx === 0 || !line.trim()) return;
                 const c = line.split(line.includes(';') ? ';' : ',');
-                if(c.length >= 3) newProds.push({ kod: c[0].trim(), ad: c[1].trim().toUpperCase(), fiyat: parseFloat(c[2].replace(',', '.')) || 0 });
+                if(c.length >= 3) {
+                    const yeniKod = c[0].trim();
+                    const yeniAd = c[1].trim().toUpperCase();
+                    const yeniFiyat = parseFloat(c[2].replace(',', '.')) || 0;
+                    const existingIdx = currentProducts.findIndex(p => p.kod === yeniKod);
+                    if(existingIdx > -1) currentProducts[existingIdx] = { kod: yeniKod, ad: yeniAd, fiyat: yeniFiyat };
+                    else currentProducts.push({ kod: yeniKod, ad: yeniAd, fiyat: yeniFiyat });
+                }
             });
-            products = newProds;
+            products = currentProducts;
             localStorage.setItem('imes_katalog', JSON.stringify(products));
             renderProducts();
+            alert("İşlem tamamlandı.");
         };
         reader.readAsText(input.files[0], "windows-1254");
     }
 
     function generatePDF() {
         const subtotal = cart.reduce((s, i) => s + (i.baseUsd * (1 - i.discount/100) * usdRate * i.qty), 0);
-        document.getElementById('pdf_cust_name').innerText = document.getElementById('customerName').value || "Teklif";
-        document.getElementById('pdf_items_body').innerHTML = cart.map(i => `
-            <tr><td>${i.kod}</td><td>${i.ad}</td><td>${f(i.baseUsd * (1-i.discount/100) * usdRate)} ₺</td><td>${i.qty}</td><td>${f(i.baseUsd * (1-i.discount/100) * usdRate * i.qty)} ₺</td></tr>
-        `).join('');
-        document.getElementById('pdf_grand').innerText = "Genel Toplam (KDV Dahil): " + f(subtotal * 1.20) + " ₺";
+        const kdv = subtotal * 0.20;
+        const grand = subtotal + kdv;
+
+        document.getElementById('pdf_cust_title').innerText = document.getElementById('customerName').value || "MÜŞTERİ";
+        document.getElementById('pdf_date').innerText = new Date().toLocaleDateString('tr-TR');
+        document.getElementById('pdf_no').innerText = "TEK" + Math.floor(Math.random() * 900000 + 100000);
+        document.getElementById('pdf_subtotal').innerText = f(subtotal) + " TL";
+        document.getElementById('pdf_kdv').innerText = f(kdv) + " TL";
+        document.getElementById('pdf_grand_total').innerText = f(grand) + " TL";
+
+        document.getElementById('pdf_items_body').innerHTML = cart.map(i => {
+            const unitTl = i.baseUsd * (1 - i.discount/100) * usdRate;
+            return `
+            <tr>
+                <td style="padding: 8px; border: 1px solid #ddd;">${i.kod}</td>
+                <td style="padding: 8px; border: 1px solid #ddd;"><b>${i.ad}</b></td>
+                <td style="padding: 8px; border: 1px solid #ddd; text-align: right;">${f(unitTl)} TL</td>
+                <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${i.qty}</td>
+                <td style="padding: 8px; border: 1px solid #ddd; text-align: right;">${f(unitTl * i.qty)} TL</td>
+            </tr>`;
+        }).join('');
+
         const el = document.getElementById('pdf-export-container');
         el.style.display = 'block';
-        html2pdf().from(el).save().then(() => el.style.display = 'none');
+        const opt = { margin: 10, filename: 'imesspor_teklif.pdf', image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } };
+        html2pdf().set(opt).from(el).save().then(() => el.style.display = 'none');
     }
 
     getKur();
