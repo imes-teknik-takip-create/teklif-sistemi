@@ -24,19 +24,13 @@
 
     /* TELEFON (MOBİL) DÜZENİ - Tekli Panel ve Navigasyon */
     @media (max-width: 992px) {
-        .main-row { display: block !important; height: auto !important; }
-        .panel { 
-            display: none !important; /* Önce hepsini kapat */
-            width: 100% !important; 
-            min-height: calc(100vh - 120px); 
-            padding: 15px; 
-            border: none;
+            .main-row { display: block !important; height: auto !important; }
+            /* Burası çok kritik: !important ekleyerek tarayıcıyı zorluyoruz */
+            .panel { width: 100% !important; display: none !important; height: auto !important; min-height: 80vh; border: none !important; }
+            .panel.active { display: block !important; visibility: visible !important; }
+            .mobile-nav { display: flex !important; }
+            body { padding-bottom: 90px !important; }
         }
-        .panel.active { display: block !important; } /* Sadece tıklananı göster */
-        .mobile-nav { display: flex !important; position: fixed; bottom: 0; left: 0; right: 0; background: var(--dark); justify-content: space-around; padding: 10px; z-index: 1000; border-top: 2px solid var(--primary); }
-        body { padding-bottom: 85px; }
-        .h4 { font-size: 1.2rem; }
-    }
 
     /* ÜRÜN KARTLARI */
     .product-card { border: 1px solid #e2e8f0; border-radius: 10px; margin-bottom: 10px; padding: 12px; background: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
