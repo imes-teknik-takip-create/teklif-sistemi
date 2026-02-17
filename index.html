@@ -642,6 +642,12 @@
     }
     
     getKur();
+    // Sayfa ilk açıldığında Ürünler sekmesini aktif et
+document.addEventListener("DOMContentLoaded", () => {
+    if(window.innerWidth <= 992) {
+        switchTab('products');
+    }
+});
     // Güncel sepeti önizleme fonksiyonu
 function previewCurrentQuote() {
     if (cart.length === 0) {
