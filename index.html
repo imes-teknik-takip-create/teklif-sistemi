@@ -74,11 +74,47 @@
                 padding: 15px; 
                 border-bottom: 5px solid #e2e8f0; /* Bölümler arasına çizgi atar */
             }
-            .mobile-nav { 
-                display: none !important; /* O barı tamamen öldürdük */
-            }
-            body { 
-                padding-bottom: 20px !important; /* Alt boşluğu sıfırladık */
+            ./* Alt Navigasyonu Aktif Et */
+.mobile-nav { 
+    display: flex !important; /* Gizliydi, görünür yaptık */
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: #1e293b;
+    height: 65px;
+    z-index: 1000;
+    justify-content: space-around;
+    align-items: center;
+    border-top: 1px solid #334155;
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+}
+
+@media (max-width: 992px) {
+    .main-row { 
+        display: block !important; 
+        position: relative;
+        height: calc(100vh - 125px) !important; /* Navbar ve Header farkı */
+        overflow: hidden !important; 
+    }
+
+    .panel { 
+        display: none; /* Varsayılan olarak panelleri gizle */
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100% !important;
+        height: 100% !important;
+        overflow-y: auto !important;
+        padding-bottom: 80px; /* Alttan navbara çarpmaması için */
+    }
+
+    .panel.active { 
+        display: block !important; /* Sadece aktif olanı göster */
+    }
+}
             }
         }
 
@@ -218,6 +254,34 @@
         if(tabId === 'cart') document.getElementById('btn-cart').classList.add('active');
         if(tabId === 'archive') document.getElementById('btn-arch').classList.add('active');
     }
+    <script>
+    const trLower = (str) => ... ; // Mevcut kodların
+    let products = ... ;
+    
+    // ESKİ switchTab fonksiyonunu bul ve salla, YERİNE BUNU KOY:
+    function switchTab(tabId) {
+        document.querySelectorAll('.panel').forEach(p => {
+            p.classList.remove('active');
+            p.style.display = 'none';
+        });
+
+        const target = document.getElementById('tab-' + tabId);
+        if (target) {
+            target.classList.add('active');
+            target.style.display = 'block';
+        }
+
+        document.querySelectorAll('.mobile-nav button').forEach(b => b.classList.remove('active'));
+        
+        if(tabId === 'products') document.getElementById('btn-prod').classList.add('active');
+        if(tabId === 'cart') document.getElementById('btn-cart').classList.add('active');
+        if(tabId === 'archive') document.getElementById('btn-arch').classList.add('active');
+
+        window.scrollTo(0, 0);
+    }
+
+    // ... Diğer fonksiyonların (getKur, renderProducts vs.) buradan devam etsin
+</script>
 
     async function getKur() {
         try { const res = await fetch('https://api.exchangerate-api.com/v4/latest/USD'); const data = await res.json(); usdRate = data.rates.TRY; } catch(e){}
@@ -742,6 +806,19 @@ function switchTab(tabId) {
     // Mobilde sayfayı en üste çek ki boşluğa bakma
     window.scrollTo(0,0);
 }
-</script>
+</script><div class="mobile-nav">
+    <button id="btn-prod" onclick="switchTab('products')" class="active">
+        <i class="bi bi-grid"></i>
+        <span>Ürünler</span>
+    </button>
+    <button id="btn-cart" onclick="switchTab('cart')">
+        <i class="bi bi-cart3"></i>
+        <span>Teklif</span>
+    </button>
+    <button id="btn-arch" onclick="switchTab('archive')">
+        <i class="bi bi-archive"></i>
+        <span>Arşiv</span>
+    </button>
+</div>
 </body>
 </html>
