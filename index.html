@@ -292,25 +292,36 @@
     }).join('');
 }
 
-    function addToCart(kod, disc) {
-        // 1. ADIM: Ürün zaten sepette var mı kontrol et
-        const isExist = cart.find(x => x.kod === kod);
-        
-        if (isExist) {
-            alert("⚠️ Bu ürün zaten sepette ekli! Adeti teklif sayfasından güncelleyebilirsiniz.");
-            return; // Eğer varsa fonksiyonu burada durdur, aşağıya geçip tekrar ekleme.
-        }
+    function addToCart(code, discount) {
+    // ... (Senin mevcut ürün ekleme kodların burada kalacak) ...
 
-        // 2. ADIM: Ürün yoksa normal ekleme işlemine devam et
-        const p = products.find(x => x.kod === kod);
-        if(!p) return;
-        cart.push({ id: Date.now(), kod: p.kod, ad: p.ad, discount: disc, qty: 1, baseUsd: p.fiyat });
-        updateUI();
-        
-        if(window.innerWidth < 992) {
-            if(confirm("Eklendi! Teklif sayfasına gitmek ister misiniz?")) switchTab('cart');
-        }
-    }
+    // Eklendi uyarısını ekrana basan bölüm:
+    const toast = document.createElement("div");
+    toast.textContent = "✔ Ürün Teklife Eklendi";
+    
+    // Tasarım ayarları (Buradan renkleri değiştirebilirsin)
+    toast.style.position = "fixed";
+    toast.style.bottom = "100px"; // Alt menünün biraz üzerinde görünsün
+    toast.style.left = "50%";
+    toast.style.transform = "translateX(-50%)";
+    toast.style.backgroundColor = "#10b981"; // Yeşil renk
+    toast.style.color = "white";
+    toast.style.padding = "12px 24px";
+    toast.style.borderRadius = "30px";
+    toast.style.zIndex = "10000";
+    toast.style.fontSize = "14px";
+    toast.style.fontWeight = "bold";
+    toast.style.boxShadow = "0 4px 15px rgba(0,0,0,0.3)";
+    toast.style.transition = "opacity 0.5s ease";
+
+    document.body.appendChild(toast);
+
+    // 1.5 saniye sonra yavaşça kaybol ve sil
+    setTimeout(() => {
+        toast.style.opacity = "0";
+        setTimeout(() => toast.remove(), 500);
+    }, 1500);
+}
 
     function updateUI() {
         document.getElementById('cartItems').innerHTML = cart.map(item => {
