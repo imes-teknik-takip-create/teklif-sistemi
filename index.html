@@ -19,11 +19,32 @@
 }
 
 /* Sayfayı tek parça halinde aşağı kaydırılabilir yapma */
+/* TELEFON (MOBİL) DÜZENİ - Yan Yana Kaydırılabilir Yapı */
 @media (max-width: 992px) {
-    .main-row { display: block !important; }
-    .panel { display: block !important; width: 100% !important; margin-bottom: 30px; }
+    .main-row { 
+        display: flex !important; /* Blok yerine esnek (flex) yapıya geçtik */
+        flex-wrap: nowrap !important; /* Alt satıra geçmeyi engelledik */
+        overflow-x: auto !important; /* Sağa-sola kaydırma ekledik */
+        scroll-snap-type: x mandatory; /* Kaydırırken panellere "mıknatıs" gibi yapışma özelliği */
+        height: calc(100vh - 60px) !important;
+        -webkit-overflow-scrolling: touch; /* iOS için pürüzsüz kaydırma */
+    }
+
+    .panel { 
+        display: block !important;
+        flex: 0 0 90%; /* Her panel ekranın %90'ını kaplasın (yanındakini azıcık gösterir) */
+        width: 90% !important;
+        height: 100% !important;
+        scroll-snap-align: start; /* Kaydırma bittiğinde paneli hizalar */
+        border-right: 2px solid #e2e8f0;
+        border-bottom: none !important;
+    }
+
+    /* Arşiv paneli sonuncusu olduğu için sağ boşluk bırakalım */
+    .archive-panel {
+        border-right: none;
+    }
 }
-    :root { --primary: #2563eb; --bg: #f8fafc; --dark: #1e293b; }
     
     /* GENEL AYARLAR */
     body { background: var(--bg); font-family: 'Inter', sans-serif; margin: 0; padding-bottom: 70px; -webkit-tap-highlight-color: transparent; }
@@ -88,6 +109,11 @@
     #pdf-export-container { display: none; background: white; padding: 30px; }
     .modal-content { border-radius: 15px; overflow: hidden; }
     .preview-table th { background-color: #f8f9fa; color: #333; font-weight: 600; text-transform: uppercase; font-size: 11px; }
+/* PDF'de satırların bölünmesini engeller */
+.preview-table tr, #pdf_items_body tr {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+}
 </style>
 </head>
 <body>
@@ -504,13 +530,18 @@
 
         const el = document.getElementById('pdf-export-container');
         el.style.display = 'block';
-        html2pdf().from(el).set({
-            margin: 10, filename: name + '_Teklif.pdf',
-            image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: { scale: 2 },
-            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-        }).save().then(() => { el.style.display = 'none'; });
-    }
+      // generatePDF fonksiyonu içindeki ilgili kısım:
+html2pdf().from(el).set({
+    margin: 10, 
+    filename: name + '_Teklif.pdf',
+    image: { type: 'jpeg', quality: 0.98 },
+    html2canvas: { scale: 2, logging: false, useCORS: true },
+    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+    // SAYFA BÖLÜNME AYARI BURASI:
+    pagebreak: { mode: ['avoid-all', 'css', 'legacy'] } 
+}).save().then(() => { 
+    el.style.display = 'none'; 
+});
 
     // YENİ ESTETİK ÖNİZLEME FONKSİYONU
     function previewArchive(id) {
