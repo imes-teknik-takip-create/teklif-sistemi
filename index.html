@@ -148,22 +148,30 @@
     #pdf-export-container { display: none; background: white; padding: 30px; }
     .modal-content { border-radius: 15px; overflow: hidden; }
     .preview-table th { background-color: #f8f9fa; color: #333; font-weight: 600; text-transform: uppercase; font-size: 11px; }
-/* Teklif sayfası (Sepet) kaydırma iyileştirmesi */
+/* Teklif sayfası panelinin kendisi */
 #tab-cart {
     overflow-y: auto !important;
-    touch-action: pan-y !important; /* Parmağı dokundurduğunda dikey kaydırmayı zorunlu kılar */
-    -webkit-overflow-scrolling: touch !important; /* iPhone/iPad için yağ gibi akma sağlar */
-}
-
-/* Teklif tablosunun kapsayıcısı için */
-#tab-cart .table-responsive {
-    overflow-x: auto !important; /* Yatay kaydırma gerekirse çalışsın */
-    touch-action: pan-y !important; /* Dikeyde sayfa kaydırmayı engelleme */
-}
-
-/* Tablo içindeki satırlar ve hücreler kaydırma hareketini yutmasın */
-#cart-body tr, #cart-body td {
     touch-action: pan-y !important;
+    -webkit-overflow-scrolling: touch !important;
+}
+
+/* Tabloyu ve içindeki her şeyi kaydırmaya zorla */
+#tab-cart table, 
+#tab-cart thead, 
+#tab-cart tbody, 
+#tab-cart tr, 
+#tab-cart td {
+    /* Bu komut 'dokunma olayını' alt katmana (sayfaya) iletir */
+    touch-action: pan-y !important; 
+    /* Bazı tarayıcılarda kaydırmayı engelleyen kullanıcı seçimini kapatır */
+    user-select: none; 
+}
+
+/* Tablo kapsayıcısının yüksekliğini sabitleyip taşmayı netleştirelim */
+.table-responsive {
+    overflow-x: auto !important;
+    overflow-y: hidden !important; /* Dikeyde sadece ana panel kaysın */
+    -webkit-overflow-scrolling: touch;
 }
 </style>
 </head>
@@ -836,4 +844,3 @@ function switchTab(tabId) {
 </div>
 </body>
 </html>
-
