@@ -292,36 +292,51 @@
     }).join('');
 }
 
-    function addToCart(code, discount) {
-    // ... (Senin mevcut ürün ekleme kodların burada kalacak) ...
-
-    // Eklendi uyarısını ekrana basan bölüm:
-    const toast = document.createElement("div");
-    toast.textContent = "✔ Ürün Teklife Eklendi";
+     function addToCart(kod, disc) {
+    // 1. ADIM: Ürün zaten sepette var mı kontrol et
+    const isExist = cart.find(x => x.kod === kod);
     
-    // Tasarım ayarları (Buradan renkleri değiştirebilirsin)
-    toast.style.position = "fixed";
-    toast.style.bottom = "100px"; // Alt menünün biraz üzerinde görünsün
-    toast.style.left = "50%";
-    toast.style.transform = "translateX(-50%)";
-    toast.style.backgroundColor = "#10b981"; // Yeşil renk
-    toast.style.color = "white";
-    toast.style.padding = "12px 24px";
-    toast.style.borderRadius = "30px";
-    toast.style.zIndex = "10000";
-    toast.style.fontSize = "14px";
-    toast.style.fontWeight = "bold";
-    toast.style.boxShadow = "0 4px 15px rgba(0,0,0,0.3)";
-    toast.style.transition = "opacity 0.5s ease";
+    if (isExist) {
+        // Ürün varsa yine de kısa bir uyarı verelim ki basılıp basılmadığı anlaşılsın
+        showToast("⚠️ Bu ürün zaten ekli!", "#f59e0b"); 
+        return;
+    }
 
+    // 2. ADIM: Ürün yoksa ekleme işlemine devam et
+    const p = products.find(x => x.kod === kod);
+    if(!p) return;
+
+    // Ürünü sepete ekleyen asıl satır
+    cart.push({ id: Date.now(), kod: p.kod, ad: p.ad, discount: disc, qty: 1, baseUsd: p.fiyat });
+    
+    // Arayüzü güncelleyen asıl fonksiyon (Senin kodunda adı bu)
+    updateUI(); 
+    
+    // 3. ADIM: Kaybolan Mesaj (Toast)
+    showToast("✔ Ürün Teklife Eklendi", "#10b981");
+}
+
+// Mesajı ekrana basan yardımcı fonksiyon (Bunu da addToCart'ın hemen altına ekle)
+function showToast(message, bgColor) {
+    const toast = document.createElement("div");
+    toast.textContent = message;
+    toast.style = `
+        position: fixed; bottom: 100px; left: 50%; 
+        transform: translateX(-50%); background: ${bgColor}; 
+        color: white; padding: 12px 24px; border-radius: 30px; 
+        z-index: 10000; font-weight: bold; font-size: 14px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        transition: opacity 0.5s ease;
+    `;
     document.body.appendChild(toast);
 
-    // 1.5 saniye sonra yavaşça kaybol ve sil
+    // 1.5 saniye sonra siler
     setTimeout(() => {
         toast.style.opacity = "0";
         setTimeout(() => toast.remove(), 500);
     }, 1500);
 }
+
 
     function updateUI() {
         document.getElementById('cartItems').innerHTML = cart.map(item => {
