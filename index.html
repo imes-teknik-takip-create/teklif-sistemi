@@ -8,6 +8,21 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
+        /* Alt barı her koşulda yok etme komutu */
+.mobile-nav { 
+    display: none !important; 
+    visibility: hidden !important; 
+    height: 0 !important; 
+    overflow: hidden !important; 
+    opacity: 0 !important;
+    pointer-events: none !important;
+}
+
+/* Sayfayı tek parça halinde aşağı kaydırılabilir yapma */
+@media (max-width: 992px) {
+    .main-row { display: block !important; }
+    .panel { display: block !important; width: 100% !important; margin-bottom: 30px; }
+}
     :root { --primary: #2563eb; --bg: #f8fafc; --dark: #1e293b; }
     
     /* GENEL AYARLAR */
@@ -23,13 +38,27 @@
     }
 
     /* TELEFON (MOBİL) DÜZENİ - Tekli Panel ve Navigasyon */
-    @media (max-width: 992px) {
-            .main-row { display: block !important; height: auto !important; }
-            /* Burası çok kritik: !important ekleyerek tarayıcıyı zorluyoruz */
-            .panel { width: 100% !important; display: none !important; height: auto !important; min-height: 80vh; border: none !important; }
-            .panel.active { display: block !important; visibility: visible !important; }
-            .mobile-nav { display: flex !important; }
-            body { padding-bottom: 90px !important; }
+    /* TELEFON DÜZENİ - Navigasyonu Kaldır, Hepsini Alt Alta Diz */
+        @media (max-width: 992px) {
+            .main-row { 
+                display: block !important; 
+                height: auto !important; 
+                overflow: visible !important; 
+            }
+            .panel { 
+                display: block !important; /* Artık hepsi görünür */
+                width: 100% !important; 
+                height: auto !important; 
+                min-height: auto !important; 
+                padding: 15px; 
+                border-bottom: 5px solid #e2e8f0; /* Bölümler arasına çizgi atar */
+            }
+            .mobile-nav { 
+                display: none !important; /* O barı tamamen öldürdük */
+            }
+            body { 
+                padding-bottom: 20px !important; /* Alt boşluğu sıfırladık */
+            }
         }
 
     /* ÜRÜN KARTLARI */
@@ -120,12 +149,6 @@
             </div>
         </div>
     </div>
-</div>
-
-<div class="mobile-nav">
-    <button id="btn-prod" onclick="switchTab('products')" class="active"><i class="bi bi-grid"></i>Ürünler</button>
-    <button id="btn-cart" onclick="switchTab('cart')"><i class="bi bi-calculator"></i>Teklif</button>
-    <button id="btn-arch" onclick="switchTab('archive')"><i class="bi bi-archive"></i>Arşiv</button>
 </div>
 
 <div id="pdf-export-container">
@@ -665,6 +688,33 @@ function initSortable(e) {
     
     // Kartı yeni yerine takar
     container.insertBefore(draggingItem, nextSibling);
+}
+function switchTab(tabId) {
+    // 1. Önce bütün panelleri tek tek bul ve hepsini gizle
+    const panels = document.querySelectorAll('.panel');
+    panels.forEach(p => {
+        p.classList.remove('active');
+        p.style.display = 'none'; // Kesin gizle
+    });
+
+    // 2. Bütün butonların ışığını söndür
+    const buttons = document.querySelectorAll('.mobile-nav button');
+    buttons.forEach(b => b.classList.remove('active'));
+
+    // 3. Tıklanan paneli bul ve onu zorla göster
+    const selectedPanel = document.getElementById('tab-' + tabId);
+    if (selectedPanel) {
+        selectedPanel.classList.add('active');
+        selectedPanel.style.display = 'block'; // Kesin göster
+    }
+
+    // 4. Tıklanan butonun ışığını yak
+    if(tabId === 'products') document.getElementById('btn-prod').classList.add('active');
+    if(tabId === 'cart') document.getElementById('btn-cart').classList.add('active');
+    if(tabId === 'archive') document.getElementById('btn-arch').classList.add('active');
+    
+    // Mobilde sayfayı en üste çek ki boşluğa bakma
+    window.scrollTo(0,0);
 }
 </script>
 </body>
