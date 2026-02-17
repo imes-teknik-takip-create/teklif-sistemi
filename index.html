@@ -296,10 +296,8 @@
         // 1. ADIM: Ürün zaten sepette var mı kontrol et
         const isExist = cart.find(x => x.kod === kod);
         
-        if (isExist) {
-            alert("⚠️ Bu ürün zaten sepette ekli! Adeti teklif sayfasından güncelleyebilirsiniz.");
-            return; // Eğer varsa fonksiyonu burada durdur, aşağıya geçip tekrar ekleme.
-        }
+        // YENİ HALİ (Sadece kısa bir uyarı verir ve kapanır)
+alert("Ürün teklife eklendi.");
 
         // 2. ADIM: Ürün yoksa normal ekleme işlemine devam et
         const p = products.find(x => x.kod === kod);
