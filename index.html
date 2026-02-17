@@ -88,18 +88,6 @@
     #pdf-export-container { display: none; background: white; padding: 30px; }
     .modal-content { border-radius: 15px; overflow: hidden; }
     .preview-table th { background-color: #f8f9fa; color: #333; font-weight: 600; text-transform: uppercase; font-size: 11px; }
-@media (max-width: 992px) {
-    .panel { 
-        display: block !important; 
-        opacity: 1 !important; 
-        visibility: visible !important; 
-        min-height: 100px;
-    }
-    .main-row {
-        display: flex;
-        flex-direction: column;
-    }
-}
 </style>
 </head>
 <body>
@@ -116,32 +104,33 @@
 
 <div class="main-row">
     <div id="tab-products" class="panel left-panel active">
-        <h6 class="fw-bold mb-3"><i class="bi bi-box-seam me-2"></i>ÜRÜN LİSTESİ</h6>
         <input type="text" id="search" class="form-control mb-3" placeholder="Ürün veya Kod Ara..." oninput="renderProducts()">
         <div id="productList"></div>
     </div>
 
     <div id="tab-cart" class="panel mid-panel">
-        <h6 class="fw-bold mb-3"><i class="bi bi-cart3 me-2"></i>TEKLİF SEPETİ</h6>
         <input type="text" id="customerName" class="form-control mb-3 fw-bold" placeholder="Müşteri Adı">
         <div id="cartItems" ondragover="initSortable(event)"></div>
-        
         <div id="summaryArea" style="display:none">
-            <div class="total-area mb-3">
-                </div>
-            <div class="d-flex gap-2 flex-wrap">
-                <button class="btn btn-success btn-sm fw-bold flex-fill" onclick="newQuote()">YENİ</button>
-                <button class="btn btn-warning btn-sm fw-bold flex-fill" onclick="saveToArchive()">KAYDET</button>
-                <button class="btn btn-info btn-sm fw-bold flex-fill text-white" onclick="previewCurrentQuote()">
-                    <i class="bi bi-eye"></i>
-                </button>
-                <button class="btn btn-primary btn-sm fw-bold flex-fill" onclick="generatePDF()">İNDİR</button>
+            <div class="total-area mb-3 text-center">
+                <div class="small opacity-75">TOPLAM (KDV DAHİL)</div>
+                <div id="sumGenel" class="h4 m-0 fw-bold">0,00 ₺</div>
+            </div>
+            <div class="d-flex justify-content-end mt-3">
+                <div class="d-flex gap-2" style="width: 100%; max-width: 400px;">
+    <button class="btn btn-success btn-sm fw-bold flex-fill" onclick="newQuote()">YENİ</button>
+    <button class="btn btn-warning btn-sm fw-bold flex-fill" onclick="saveToArchive()">KAYDET</button>
+    <button class="btn btn-info btn-sm fw-bold flex-fill text-white" onclick="previewCurrentQuote()">
+        <i class="bi bi-eye"></i>
+    </button>
+    <button class="btn btn-primary btn-sm fw-bold flex-fill" onclick="generatePDF()">İNDİR</button>
+</div>
             </div>
         </div>
     </div>
 
     <div id="tab-archive" class="panel archive-panel">
-        <h6 class="fw-bold mb-3"><i class="bi bi-archive me-2"></i>GEÇMİŞ TEKLİFLER</h6>
+        <h6 class="fw-bold mb-3">GEÇMİŞ TEKLİFLER</h6>
         <div id="archiveList"></div>
     </div>
 </div>
