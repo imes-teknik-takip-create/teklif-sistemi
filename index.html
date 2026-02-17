@@ -756,33 +756,27 @@ function initSortable(e) {
     container.insertBefore(draggingItem, nextSibling);
 }
 function switchTab(tabId) {
-    // 1. Masaüstündeysek hiçbir şeyi gizleme (Yan yana kalsınlar)
-    if (window.innerWidth > 992) {
-        document.querySelectorAll('.panel').forEach(p => p.style.display = 'block');
-        return;
-    }
+    if (window.innerWidth > 992) return;
 
-    // 2. Mobildeysek önce tüm panelleri gizle
-    document.querySelectorAll('.panel').forEach(p => {
+    // Tüm panelleri bul ve temizle
+    const panels = document.querySelectorAll('.panel');
+    panels.forEach(p => {
         p.classList.remove('active');
-        p.style.display = 'none';
+        p.style.setProperty('display', 'none', 'important'); // Kesin kapat
     });
 
-    // 3. Tıklanan paneli bul ve aç
+    // Hedef paneli bul ve aç
     const target = document.getElementById('tab-' + tabId);
     if (target) {
         target.classList.add('active');
-        target.style.display = 'block';
+        target.style.setProperty('display', 'block', 'important'); // Kesin aç
     }
 
-    // 4. Alt bar buton renklerini güncelle
+    // Butonları güncelle
     document.querySelectorAll('.mobile-nav button').forEach(b => b.classList.remove('active'));
-    
-    if(tabId === 'products') document.getElementById('btn-prod').classList.add('active');
-    if(tabId === 'cart') document.getElementById('btn-cart').classList.add('active');
-    if(tabId === 'archive') document.getElementById('btn-arch').classList.add('active');
+    const btnId = tabId === 'products' ? 'btn-prod' : (tabId === 'cart' ? 'btn-cart' : 'btn-arch');
+    document.getElementById(btnId).classList.add('active');
 
-    // Sayfayı en üste çek
     window.scrollTo(0, 0);
 }
 </script>
