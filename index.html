@@ -202,14 +202,14 @@
         <div class="bg-light p-3 rounded border mb-3 shadow-sm">
     <div class="row g-2">
         <div class="col-6">
-            <label class="form-label small fw-bold">Tümüne İndirim Uygula (%)</label>
+            <label class="form-label small fw-bold">İndirim (%)</label>
             <div class="input-group input-group-sm">
                 <input type="number" id="globalDiscountInput" class="form-control" placeholder="TOPLU İNDİRİM">
                 <button class="btn btn-dark" onclick="applyGlobalDiscount()">Uygula</button>
             </div>
         </div>
         <div class="col-6">
-            <label class="form-label small fw-bold">Hedef Genel Toplam (₺)</label>
+            <label class="form-label small fw-bold">Hedef Toplam (₺)</label>
             <div class="input-group input-group-sm">
                 <input type="number" id="targetTotalInput" class="form-control" placeholder="KDV DAHİL TOPLAM" oninput="formatTargetInput(this)">
                 <button class="btn btn-primary" onclick="applyTargetTotal()">Hesapla</button>
