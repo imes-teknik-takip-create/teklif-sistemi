@@ -199,6 +199,27 @@
 
     <div id="tab-cart" class="panel mid-panel">
         <input type="text" id="customerName" class="form-control mb-3 fw-bold" placeholder="Müşteri Adı">
+        <div class="bg-light p-3 rounded border mb-3 shadow-sm">
+    <div class="row g-2">
+        <div class="col-6">
+            <label class="form-label small fw-bold">Tümüne İndirim Uygula (%)</label>
+            <div class="input-group input-group-sm">
+                <input type="number" id="globalDiscountInput" class="form-control" placeholder="TOPLU İNDİRİM">
+                <button class="btn btn-dark" onclick="applyGlobalDiscount()">Uygula</button>
+            </div>
+        </div>
+        <div class="col-6">
+            <label class="form-label small fw-bold">Hedef Genel Toplam (₺)</label>
+            <div class="input-group input-group-sm">
+                <input type="number" id="targetTotalInput" class="form-control" placeholder="KDV DAHİL TOPLAM" oninput="formatTargetInput(this)">
+                <button class="btn btn-primary" onclick="applyTargetTotal()">Hesapla</button>
+            </div>
+        </div>
+    </div>
+    <div class="mt-2 small text-muted text-center" style="font-size: 10px;">
+        * Hedef fiyat girildiğinde indirim oranları otomatik ayarlanır.
+    </div>
+</div>
         <div id="cartItems" ondragover="initSortable(event)"></div>
         <div id="summaryArea" style="display:none">
             <div class="total-area mb-3 text-center">
@@ -387,7 +408,7 @@ function showToast(message, bgColor) {
                         <div class="d-flex align-items-center">
                             <span class="small me-1">İnd:</span>
                             <input type="number" class="input-mini" value="${item.discount}" 
-                                   style="width: 42px; height: 26px; font-size: 12px; border:1px solid #ccc; border-radius:4px;"
+                                   style="width: 50px; height: 26px; font-size: 12px; border:1px solid #ccc; border-radius:4px;"
                                    onchange="updateItem(${item.id}, 'discount', this.value)">
                             <span class="small ms-1">%</span>
                         </div>
@@ -685,9 +706,11 @@ function showToast(message, bgColor) {
             <div class="mt-4 pt-3 border-top text-end" style="line-height: 2;">
                 <div class="text-muted small">Ara Toplam: <span class="text-dark fw-bold ms-2">${f(subtotal)} TL</span></div>
                 <div class="text-muted small">KDV (%20): <span class="text-dark fw-bold ms-2">${f(kdvTotal)} TL</span></div>
-                <div class="h4 mt-2 fw-bold text-primary border-top pt-2">
-                    <span class="text-dark h6 fw-bold me-2">GENEL TOPLAM:</span> ${f(grandTotal)} TL
-                </div>
+                // YENİ HALİ (Daha zarif ve dengeli)
+<div class="mt-2 fw-bold border-top pt-2" style="font-size: 16px; color: #333;">
+    <span class="h6 fw-bold me-2" style="margin-bottom: 0;">GENEL TOPLAM:</span> 
+    <span style="color: #0d6efd;">${f(grandTotal)} TL</span>
+</div>
             </div>
         `;
 
@@ -834,6 +857,48 @@ function switchTab(tabId) {
 
     window.scrollTo(0, 0);
 }
+// 1. Tüm ürünlere aynı indirim oranını verme
+function applyGlobalDiscount() {
+    const disc = parseFloat(document.getElementById('globalDiscountInput').value);
+    if (isNaN(disc)) { alert("Geçerli bir indirim oranı girin!"); return; }
+    
+    cart.forEach(item => {
+        item.discount = disc;
+    });
+    updateUI();
+}
+
+// 2. Hedeflenen Genel Toplam (KDV Dahil) üzerinden indirim hesaplama
+function applyTargetTotal() {
+    const targetGrandTotal = parseFloat(document.getElementById('targetTotalInput').value);
+    if (isNaN(targetGrandTotal) || targetGrandTotal <= 0) { alert("Geçerli bir hedef tutar girin!"); return; }
+
+    // Hedef Ara Toplam (KDV hariç) = Hedef Genel Toplam / 1.20
+    const targetSubtotal = targetGrandTotal / 1.20;
+
+    // Sepetteki ürünlerin liste fiyatları toplamı (TL bazında indirimden önceki hali)
+    const totalListPriceTl = cart.reduce((sum, item) => sum + (item.baseUsd * usdRate * item.qty), 0);
+
+    if (totalListPriceTl === 0) return;
+
+    // Gereken genel indirim oranı = 1 - (Hedef Ara Toplam / Toplam Liste Fiyatı)
+    // Örn: Liste 100, Hedef 80 ise -> 1 - 0.8 = 0.2 (%20 indirim lazım)
+    let requiredDiscount = (1 - (targetSubtotal / totalListPriceTl)) * 100;
+
+    // Gerçekçi olmayan bir indirim çıkarsa (negatif veya %100+) uyar
+    if (requiredDiscount < 0) {
+        alert("Hedef fiyat liste fiyatından yüksek! İndirim 0 yapıldı.");
+        requiredDiscount = 0;
+    }
+
+    cart.forEach(item => {
+        item.discount = parseFloat(requiredDiscount.toFixed(10));
+    });
+
+    updateUI();
+    alert(`Hedef tutara ulaşmak için tüm ürünlere %${requiredDiscount.toFixed(2)} indirim uygulandı.`);
+}
+
 </script>
 <div class="mobile-nav">
     <button id="btn-prod" onclick="switchTab('products')" class="active">
