@@ -604,25 +604,19 @@ async function getKur() {
     doc.text("Satıcı Onayı", 15, signY); doc.line(15, signY + 2, 60, signY + 2);
     doc.text("Müşteri Onayı", 135, signY); doc.line(135, signY + 2, 180, signY + 2);
 
-    if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+   // generatePDF içindeki indirme/kaydetme kısmını tamamen şununla değiştir:
+if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
     // 1. PDF'i Blob olarak oluştur
     const blob = doc.output('blob');
-    const fileName = `${customer.replace(/\s+/g, '_')}_Teklif.pdf`;
-
-    // 2. Gizli bir indirme linki oluştur
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = fileName;
     
-    // 3. Linki tıkla ve temizle
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-
-    // Not: Android'de bildirim çubuğuna iner, iOS'ta "İndirilsin mi?" diye sorar.
-    // İndikten sonra "Aç" dersen direkt telefonun PDF uygulamasında (Acrobat, Drive vb.) açılır.
+    // 2. Blob URL'i oluştur
+    const url = URL.createObjectURL(blob);
+    
+    // 3. Mevcut pencerede PDF'i aç (Yeni sekme engelini aşmak için en iyisi budur)
+    // Bu sayede telefonun kendi PDF arayüzü doğrudan ekrana gelir.
+    window.location.href = url; 
 } else {
-    // Masaüstü için normal kayıt
+    // Masaüstünde normal bilgisayara indir
     doc.save(`${customer || 'teklif'}.pdf`);
 }
 }
@@ -828,6 +822,7 @@ function newQuote() {
 </script>
 </body>
 </html>
+
 
 
 
