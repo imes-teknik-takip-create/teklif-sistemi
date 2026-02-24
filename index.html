@@ -11,6 +11,52 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
 
     <style>
+        /* MOBİL FONT AYARLARI */
+@media (max-width: 768px) {
+    /* Genel yazı boyutu */
+    body {
+        font-size: 12px !important;
+    }
+
+    /* Ürün isimleri ve başlıklar */
+    b, .fw-bold {
+        font-size: 13px !important;
+    }
+
+    /* Ürün kartlarındaki alt bilgiler (Adet, İndirim vb.) */
+    span, small {
+        font-size: 10px !important;
+    }
+
+    /* Katalogdaki butonların (Liste, %25 vb.) içindeki yazılar */
+    .p-box span {
+        font-size: 10px !important;
+    }
+    .p-box b {
+        font-size: 11px !important;
+    }
+
+    /* Input alanları (Arama, İndirim, Adet) */
+    .form-control, .form-select, .input-mini {
+        font-size: 11px !important;
+        height: auto !important;
+        padding: 5px !important;
+    }
+
+    /* Alt toplam alanı (Ara Toplam, Genel Toplam) */
+    .total-area span {
+        font-size: 11px !important;
+    }
+    .total-area .fw-bold {
+        font-size: 14px !important;
+    }
+
+    /* Sabit butonların (YENİ, KAYDET vb.) yazıları */
+    .sticky-action-buttons .btn {
+        font-size: 10px !important;
+        padding: 8px 2px !important;
+    }
+}
         /* İndirim Kutuları Renk ve Gölge Efektleri */
 .p-box.liste { background-color: #f8fafc; border-color: #000000; color: #1e293b; }
 .p-box.disc25 { background-color: #f0fdf4; border-color: #000000; color: #166534; } /* Yeşilimsi */
@@ -399,7 +445,7 @@ async function getKur() {
 
     const summaryArea = document.getElementById('summaryArea');
     summaryArea.style.display = cart.length ? 'block' : 'none';
-    
+       
     document.querySelector('.total-area').innerHTML = `
         <div class="d-flex justify-content-between small opacity-75">
             <span>ARA TOPLAM:</span>
