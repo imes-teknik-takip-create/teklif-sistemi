@@ -604,14 +604,25 @@ async function getKur() {
     doc.text("Satıcı Onayı", 15, signY); doc.line(15, signY + 2, 60, signY + 2);
     doc.text("Müşteri Onayı", 135, signY); doc.line(135, signY + 2, 180, signY + 2);
 
-    // Kaydet
-    if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
-    // Mobilde ise: PDF'i yeni sekmede aç (Doğrudan paylaşım için)
+    // generatePDF içindeki eski yönlendirme kodunu bununla değiştir:
+if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+    // 1. PDF'i Blob olarak al
     const blob = doc.output('blob');
-    const url = URL.createObjectURL(blob);
-    window.open(url, '_blank');
+    
+    // 2. Dosya adını belirle (Müşteri adı + tarih)
+    const fileName = `${customer.replace(/\s+/g, '_')}_Teklif.pdf`;
+    
+    // 3. Dosyayı isimlendirilmiş bir dosya objesine çevir
+    const file = new File([blob], fileName, { type: 'application/pdf' });
+    const url = URL.createObjectURL(file);
+    
+    // 4. Yeni sekmede aç ve başlığı zorla
+    const newWindow = window.open(url, '_blank');
+    if (newWindow) {
+        newWindow.document.title = fileName; // Sekme ismini düzeltir
+    }
 } else {
-    // Masaüstünde ise: Normal indir
+    // Masaüstünde normal indir
     doc.save(`${customer || 'teklif'}.pdf`);
 }
 }
@@ -817,4 +828,5 @@ function newQuote() {
 </script>
 </body>
 </html>
+
 
