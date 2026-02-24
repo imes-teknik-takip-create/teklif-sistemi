@@ -101,6 +101,31 @@ html, body {
     max-width: 100%;
     overflow-x: hidden;
 }
+/* Mobil Alt Panel Düzenlemesi */
+@media (max-width: 768px) {
+    #summaryArea {
+        position: sticky;
+        bottom: 70px; /* Alt menü barının (tab-bar) hemen üzerinde durması için */
+        background: #fff;
+        padding: 15px !important;
+        border-top: 2px solid #eee;
+        z-index: 999;
+        margin-left: -15px; /* Panel padding'ini sıfırlayıp tam genişlik sağlamak için */
+        margin-right: -15px;
+        box-shadow: 0 -5px 15px rgba(0,0,0,0.1);
+    }
+
+    /* Butonların mobilde daha kolay basılması için yükseklik ayarı */
+    #summaryArea .btn {
+        padding: 10px 5px;
+        font-size: 11px;
+    }
+
+    /* Liste sonuna boşluk ekle ki son ürün butonların altında kalmasın */
+    #cartItems {
+        padding-bottom: 120px; 
+    }
+}
     </style>
 </head>
 <body>
