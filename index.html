@@ -605,7 +605,15 @@ async function getKur() {
     doc.text("Müşteri Onayı", 135, signY); doc.line(135, signY + 2, 180, signY + 2);
 
     // Kaydet
-    doc.save(`${customer}.pdf`);
+    if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+    // Mobilde ise: PDF'i yeni sekmede aç (Doğrudan paylaşım için)
+    const blob = doc.output('blob');
+    const url = URL.createObjectURL(blob);
+    window.open(url, '_blank');
+} else {
+    // Masaüstünde ise: Normal indir
+    doc.save(`${customer || 'teklif'}.pdf`);
+}
 }
 
     function renderPreview(data) {
@@ -809,3 +817,4 @@ function newQuote() {
 </script>
 </body>
 </html>
+
