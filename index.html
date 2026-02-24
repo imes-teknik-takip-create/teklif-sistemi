@@ -87,6 +87,20 @@
     font-weight: bold;        /* İstersen kalın da yapabilirsin */
     background-color: white;
 }
+/* Arama ve Navigasyon Bölümünü Sabitle */
+.nav-tabs, .header-container, #search-area {
+    position: sticky;
+    top: 0;
+    background: white;
+    z-index: 1000;
+    padding: 10px 0;
+}
+
+/* Sayfanın sağa kaymasını kökten engelle */
+html, body {
+    max-width: 100%;
+    overflow-x: hidden;
+}
     </style>
 </head>
 <body>
@@ -314,9 +328,11 @@ async function getKur() {
             <div class="flex-grow-1" style="min-width: 0;">
                 <div class="d-flex justify-content-between align-items-center mb-2">
                     <div class="d-flex align-items-center gap-2" style="min-width: 0; flex: 1;">
+                        <span class="badge bg-dark" style="font-size: 10px; padding: 4px 6px;">${item.kod}</span>
+                        
                         <b style="font-size:14px; color:#000; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${item.ad}</b>
                         
-                        <span style="font-size:12px; color:#888; white-space: nowrap; background-color: #f8f9fa; padding: 2px 6px; border-radius: 4px; border: 1px solid #eee;">
+                        <span style="font-size:11px; color:#888; white-space: nowrap; background-color: #f8f9fa; padding: 2px 6px; border-radius: 4px; border: 1px solid #eee;">
                             Adet: ${item.qty} | İnd: %${item.discount}
                         </span>
                     </div>
@@ -526,43 +542,48 @@ async function getKur() {
     const selectedCurr = document.getElementById('currencySelect').value;
     const symbol = selectedCurr === 'USD' ? '$' : (selectedCurr === 'EUR' ? '€' : '₺');
     
-    // Kur çarpanı: Ham USD fiyatını seçilen birime çevirir
     let rate = 1; 
     if (selectedCurr === 'TL') rate = usdRate; 
     else if (selectedCurr === 'EUR') rate = usdRate / eurRate;
 
-    // 2. KDV Hariç toplamı sıfırdan hesapla
     let kdvHaricToplam = 0;
 
     let itemsHtml = data.items.map(i => {
-        // Ürünün indirimli birim fiyatı (KDV Hariç)
         const unitPrice = i.baseUsd * (1 - i.discount / 100) * rate;
         const lineTotal = unitPrice * i.qty;
         kdvHaricToplam += lineTotal;
 
         return `
         <div class="d-flex align-items-center justify-content-between p-3 mb-2 border-bottom">
-            <div class="d-flex align-items-center gap-3" style="flex: 1;">
-                <img src="${i.resim || ''}" style="width:60px; height:60px; object-fit:contain; border-radius:6px; background:#f8f9fa;">
-                <div class="d-flex align-items-center gap-2">
-                    <b style="font-size:14px; color:#000;">${i.ad}</b>
-                    <span style="font-size:12px; color:#888; background:#f8f9fa; padding:2px 5px; border-radius:4px; border:1px solid #eee;">
-                        ${i.qty} Adet | %${i.discount} İnd.
-                    </span>
+            <div class="d-flex align-items-center gap-3" style="flex: 2; min-width: 0;">
+                <img src="${i.resim || ''}" style="width:60px; height:60px; object-fit:contain; border-radius:6px; background:#f8f9fa;" onerror="this.src='https://via.placeholder.com/60'">
+                <div style="min-width: 0;">
+                    <div class="d-flex align-items-center gap-2 mb-1">
+                        <span class="badge bg-dark" style="font-size: 10px;">${i.kod}</span>
+                        <b style="font-size:14px; color:#000; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${i.ad}</b>
+                    </div>
+                    <span style="font-size:12px; color:#888;">%${i.discount} İndirim</span>
                 </div>
             </div>
-            <div class="d-flex align-items-center" style="column-gap: 50px;">
-                <span style="font-size: 14px; color: #000; font-weight: 500;">
-                    Birim: ${f(unitPrice)} ${symbol}
-                </span>
-                <span style="font-size: 14px; color: #000; font-weight: 700; min-width: 100px; text-align: right;">
-                    Toplam: ${f(lineTotal)} ${symbol}
-                </span>
+            
+            <div class="d-flex align-items-center text-end" style="flex: 3; justify-content: flex-end; gap: 30px;">
+                <div style="min-width: 100px;">
+                    <div style="font-size: 10px; color: #888; text-transform: uppercase;">Birim</div>
+                    <span style="font-size: 14px; color: #000; font-weight: 500;">${f(unitPrice)} ${symbol}</span>
+                </div>
+                <div style="min-width: 60px;">
+                    <div style="font-size: 10px; color: #888; text-transform: uppercase;">Adet</div>
+                    <span style="font-size: 14px; color: #000; font-weight: 600;">${i.qty}</span>
+                </div>
+                <div style="min-width: 120px;">
+                    <div style="font-size: 10px; color: #888; text-transform: uppercase;">Toplam</div>
+                    <span style="font-size: 14px; color: #000; font-weight: 700;">${f(lineTotal)} ${symbol}</span>
+                </div>
             </div>
         </div>`;
     }).join('');
 
-    // 3. KDV ve Genel Toplam Hesaplama (%20 üzerinden)
+    // 3. KDV ve Genel Toplam Hesaplama
     const kdvTutari = kdvHaricToplam * 0.20;
     const kdvDahilToplam = kdvHaricToplam + kdvTutari;
 
