@@ -88,6 +88,29 @@
         padding: 12px !important;
         font-size: 12px !important;
     }
+        /* Birim ve Toplam fiyatlarının puntosunu küçültme */
+    .cart-item .text-end span {
+        font-size: 13px !important; /* Fiyat rakamları */
+        font-weight: 700 !important;
+    }
+
+    .cart-item .text-end div {
+        font-size: 9px !important; /* Üstteki "Birim" ve "Toplam" yazıları */
+        margin-bottom: -2px !important;
+    }
+
+    /* Fiyatların arasındaki 50px'lik boşluğu mobilde daraltalım ki taşmasın */
+    .cart-item .d-flex.align-items-center[style*="column-gap: 50px"] {
+        column-gap: 15px !important; 
+        justify-content: flex-end;
+        flex: 1;
+    }
+
+    /* Sepetteki ürünün genel alt satır düzeni */
+    .cart-item .d-flex.justify-content-between.align-items-center.bg-light {
+        padding: 6px 10px !important;
+        gap: 5px !important;
+    }
 }
         /* MOBİL FONT AYARLARI */
 @media (max-width: 768px) {
@@ -910,6 +933,7 @@ function newQuote() {
 </script>
 </body>
 </html>
+
 
 
 
