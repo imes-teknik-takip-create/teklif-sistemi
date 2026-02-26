@@ -11,107 +11,6 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
 
     <style>
-        @media (max-width: 768px) {
-    /* İndirim ve Adet kutularını ufaltma */
-    .input-mini {
-        width: 45px !important; /* Genişliği daralttık */
-        height: 28px !important; /* Yüksekliği kısalttık */
-        font-size: 10px !important; /* Yazıyı ufalttık */
-        padding: 2px !important; /* İç boşluğu azalttık */
-        text-align: center;
-        border-radius: 4px !important;
-    }
-
-    /* Kutuların yanındaki "İnd:" ve "Adet:" yazılarını ufalttık */
-    .cart-item .d-flex.align-items-center.gap-1 {
-        font-size: 10px !important;
-        gap: 3px !important;
-    }
-
-    /* Kutuların olduğu satırı daha sıkışık (derli toplu) yaptık */
-    .cart-item .bg-light.p-2 {
-        padding: 5px !important;
-        gap: 10px !important;
-    }
-}
-
-    .cart-item .text-end {
-        text-align: left !important;
-        width: 100%;
-        display: flex;
-        justify-content: space-between; /* Birim/Toplam yazısı sol, rakam sağ */
-        border-bottom: 1px dashed #ddd;
-        padding-bottom: 2px;
-    }
-
-    .cart-item .text-end:last-child {
-        border-bottom: none;
-    }
-
-    /* 3. Önizleme Ekranı (Preview) Estetiği */
-    #previewBody .border-bottom {
-        flex-direction: column !important;
-        align-items: flex-start !important;
-        padding: 10px 0 !important;
-    }
-
-    #previewBody .text-end {
-        flex-direction: row !important;
-        justify-content: space-between !important;
-        width: 100% !important;
-        gap: 10px !important;
-        margin-top: 10px;
-        background: #fdfdfd;
-        padding: 5px;
-    }
-
-    /* 4. Sabit Buton Paneli (YENİ-KAYDET-İNDİR) */
-    .sticky-action-buttons {
-        padding: 8px !important;
-        bottom: 60px !important; /* Tab barın üstünde tam otursun */
-    }
-
-    .sticky-action-buttons .d-flex {
-        gap: 5px !important;
-    }
-
-    .sticky-action-buttons .btn {
-        font-size: 9px !important;
-        padding: 10px 2px !important;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
-
-    /* 5. Toplam Bilgi Paneli (KDV/Genel Toplam) */
-    .total-area {
-        margin: 10px !important;
-        padding: 12px !important;
-        font-size: 12px !important;
-    }
-        /* Birim ve Toplam fiyatlarının puntosunu küçültme */
-    .cart-item .text-end span {
-        font-size: 13px !important; /* Fiyat rakamları */
-        font-weight: 700 !important;
-    }
-
-    .cart-item .text-end div {
-        font-size: 9px !important; /* Üstteki "Birim" ve "Toplam" yazıları */
-        margin-bottom: -2px !important;
-    }
-
-    /* Fiyatların arasındaki 50px'lik boşluğu mobilde daraltalım ki taşmasın */
-    .cart-item .d-flex.align-items-center[style*="column-gap: 50px"] {
-        column-gap: 15px !important; 
-        justify-content: flex-end;
-        flex: 1;
-    }
-
-    /* Sepetteki ürünün genel alt satır düzeni */
-    .cart-item .d-flex.justify-content-between.align-items-center.bg-light {
-        padding: 6px 10px !important;
-        gap: 5px !important;
-    }
-}
         /* MOBİL FONT AYARLARI */
 @media (max-width: 768px) {
     /* Genel yazı boyutu */
@@ -933,12 +832,6 @@ function newQuote() {
 </script>
 </body>
 </html>
-
-
-
-
-
-
 
 
 
