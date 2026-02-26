@@ -12,32 +12,28 @@
 
     <style>
         @media (max-width: 768px) {
-    /* 1. Ürün Kartlarını Kompakt Yapalım */
-    .cart-item {
-        padding: 10px !important;
-        margin-bottom: 10px !important;
+    /* İndirim ve Adet kutularını ufaltma */
+    .input-mini {
+        width: 45px !important; /* Genişliği daralttık */
+        height: 28px !important; /* Yüksekliği kısalttık */
+        font-size: 12px !important; /* Yazıyı ufalttık */
+        padding: 2px !important; /* İç boşluğu azalttık */
+        text-align: center;
+        border-radius: 4px !important;
     }
 
-    /* Görseli küçültüp metne yer açalım */
-    .cart-item img {
-        width: 45px !important;
-        height: 45px !important;
+    /* Kutuların yanındaki "İnd:" ve "Adet:" yazılarını ufalttık */
+    .cart-item .d-flex.align-items-center.gap-1 {
+        font-size: 10px !important;
+        gap: 3px !important;
     }
 
-    /* Başlık ve Badge yan yana sığsın */
-    .cart-item b {
-        font-size: 12px !important;
-        max-width: 120px;
-        display: inline-block;
+    /* Kutuların olduğu satırı daha sıkışık (derli toplu) yaptık */
+    .cart-item .bg-light.p-2 {
+        padding: 5px !important;
+        gap: 10px !important;
     }
-
-    /* 2. Fiyat Alanlarını Düzenleyelim (Taşmayı önler) */
-    .cart-item .d-flex.align-items-center.bg-light {
-        flex-direction: column; /* Mobilde inputlar ve fiyatlar alt alta gelsin */
-        align-items: flex-start !important;
-        gap: 8px !important;
-        padding: 8px !important;
-    }
+}
 
     .cart-item .text-end {
         text-align: left !important;
